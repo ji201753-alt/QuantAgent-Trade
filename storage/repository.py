@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional
-from common.models import OHLCV, TradeEvent, SignalEvent
+from common.models import OHLCV, TradeEvent, SignalEvent, OrderBookSnapshot
 
 class DataRepository(ABC):
+    @abstractmethod
+    async def initialize(self):
+        pass
+
     @abstractmethod
     async def save_ohlcv(self, symbol: str, data: OHLCV):
         pass
@@ -13,6 +17,10 @@ class DataRepository(ABC):
 
     @abstractmethod
     async def save_trade(self, symbol: str, trade: TradeEvent):
+        pass
+
+    @abstractmethod
+    async def save_orderbook(self, symbol: str, book: OrderBookSnapshot):
         pass
 
     @abstractmethod
