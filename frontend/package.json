@@ -1,0 +1,14 @@
+{
+  "name": "quant-core-terminal",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.263.1",
+    "zustand": "^4.4.1",
+    "lightweight-charts": "^4.1.1",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^1.14.0"
+  }
+}

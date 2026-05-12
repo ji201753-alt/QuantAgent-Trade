@@ -107,3 +107,24 @@ class ForecastResult:
     predicted_value: float
     model_name: str
     confidence_interval: Optional[tuple[float, float]] = None
+
+@dataclass
+class ForecastDistribution:
+    mean: float
+    std: float
+    median: float
+    p10: float
+    p90: float
+
+@dataclass
+class ForecastingOutput:
+    symbol: str
+    timestamp: datetime
+    horizon: str
+    target_metric: str # e.g., "price", "volatility", "imbalance"
+    prediction: float
+    distribution: Optional[ForecastDistribution] = None
+    confidence_interval: Optional[tuple[float, float]] = None
+    uncertainty_score: float = 0.0 # 0.0 to 1.0
+    model_name: str = "generic"
+    metadata: Dict[str, Any] = field(default_factory=dict)
