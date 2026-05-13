@@ -8,13 +8,15 @@ import { SignalPanel } from './components/panels/SignalPanel';
 import { AnomalyPanel } from './components/panels/AnomalyPanel';
 import { ContextPanel } from './components/panels/ContextPanel';
 import { MetaPanel } from './components/panels/MetaPanel';
+import { MacroPanel } from './components/panels/MacroPanel';
+import { DecisionPanel } from './components/panels/DecisionPanel';
 import { HighFrequencyChart } from './components/charts/HighFrequencyChart';
 import { FactorExplorer } from './components/research/FactorExplorer';
 import { AlertTimeline } from './components/alerts/AlertTimeline';
 import { ReplayControl } from './components/replay/ReplayControl';
 import { Panel } from './components/layout/Panel';
 
-type Workspace = 'realtime' | 'research' | 'operational';
+type Workspace = 'realtime' | 'research' | 'operational' | 'macro';
 
 const App: React.FC = () => {
   const { isConnected, activeSymbol } = useTerminalStore();
@@ -27,21 +29,20 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen w-screen bg-black text-slate-100 flex flex-col font-sans overflow-hidden select-none">
-      {/* Header */}
-      <header className="h-10 border-b border-slate-800 bg-slate-900/50 flex items-center px-4 justify-between z-50">
+      <header className="h-10 border-b border-slate-800 bg-slate-900/50 flex items-center px-4 justify-between z-50 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-8 h-full">
           <div className="flex items-center gap-2">
              <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center font-black text-xs text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]">Q</div>
              <span className="font-black tracking-tighter text-sm uppercase italic text-shadow-glow">QuantCore</span>
           </div>
           <nav className="flex gap-1 h-full pt-1">
-             {(['realtime', 'research', 'operational'] as Workspace[]).map(ws => (
+             {(['realtime', 'research', 'operational', 'macro'] as Workspace[]).map(ws => (
                <button
                   key={ws}
                   onClick={() => setActiveWorkspace(ws)}
                   className={`px-4 text-[10px] uppercase font-black transition-all border-b-2 ${activeWorkspace === ws ? 'text-indigo-400 border-indigo-500 bg-indigo-500/5' : 'text-slate-500 border-transparent hover:text-slate-300'}`}
                >
-                  Workspace_{ws}
+                  {ws}
                </button>
              ))}
           </nav>
@@ -53,20 +54,19 @@ const App: React.FC = () => {
                 <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500'} animate-pulse` } />
                 {isConnected ? 'Sync_OK' : 'Sync_Error'}
               </span>
-              <span className="bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700 font-bold tracking-widest text-[8px]">H_MEM: 1.4GB</span>
+              <span className="bg-slate-800/40 px-2 py-0.5 rounded border border-slate-700 font-bold tracking-widest text-[8px] italic">D_MEM: 2.2GB</span>
            </div>
            <div className="flex gap-2">
               <button className="bg-slate-950 border border-slate-800 hover:border-indigo-500 transition-all text-indigo-400 text-[10px] font-black px-4 py-1 rounded">
-                 COGNITION_MAP
+                 UNCERTAINTY_TOPOLOGY
               </button>
               <button className="bg-white hover:bg-slate-200 text-black text-[10px] font-black px-4 py-1 rounded transition-all active:scale-95 shadow-lg shadow-white/5">
-                DEPLOY_META
+                DEPLOY_SYSTEM
               </button>
            </div>
         </div>
       </header>
 
-      {/* Main Terminal Content */}
       <div className="flex-1 overflow-hidden">
         {activeWorkspace === 'realtime' && (
           <main className="h-full grid grid-cols-12 gap-0.5 p-0.5 bg-slate-900/10">
@@ -100,7 +100,7 @@ const App: React.FC = () => {
                      <span className="text-2xl font-mono text-blue-400 font-black">0.82</span>
                   </div>
                   <div className="bg-indigo-600 p-3 flex flex-col justify-between shadow-[inset_0_0_40px_rgba(0,0,0,0.4)]">
-                     <span className="text-[9px] text-indigo-100 uppercase font-bold tracking-widest">Signal_score</span>
+                     <span className="text-[9px] text-indigo-100 uppercase font-bold tracking-widest font-black">Signal_score</span>
                      <span className="text-2xl font-mono text-white font-black">0.68 (LONG)</span>
                   </div>
                </div>
@@ -121,16 +121,17 @@ const App: React.FC = () => {
           <main className="h-full grid grid-cols-12 gap-0.5 p-0.5 bg-slate-900/10 text-shadow-glow">
              <div className="col-span-4 flex flex-col gap-0.5 overflow-hidden">
                 <div className="flex-1 overflow-hidden"><ContextPanel /></div>
-                <div className="flex-1 overflow-hidden"><MetaPanel /></div>
+                <div className="flex-1 overflow-hidden"><DecisionPanel /></div>
              </div>
              <div className="col-span-4 flex flex-col gap-0.5 overflow-hidden">
-                <div className="flex-1 overflow-hidden"><AlertTimeline /></div>
+                <div className="flex-[3] overflow-hidden"><AlertTimeline /></div>
+                <div className="flex-[2] overflow-hidden"><MetaPanel /></div>
              </div>
              <div className="col-span-4 flex flex-col gap-0.5 overflow-hidden">
                 <div className="h-60 overflow-hidden"><ReplayControl /></div>
                 <div className="flex-1 overflow-hidden">
-                   <Panel title="Situational Meta-Awareness">
-                      <div className="p-3 space-y-4 font-mono text-[10px] uppercase">
+                   <Panel title="Situational Awareness & Confidence">
+                      <div className="p-3 space-y-4 font-mono text-[10px] uppercase text-shadow-glow">
                          <div className="bg-slate-900/50 p-2 border border-slate-800 rounded group hover:border-indigo-500/50 transition-colors">
                             <span className="text-slate-500 block mb-1">Regime Persistence</span>
                             <div className="flex items-center justify-between">
@@ -139,14 +140,14 @@ const App: React.FC = () => {
                             </div>
                          </div>
                          <div className="bg-slate-900/50 p-2 border border-slate-800 rounded group hover:border-amber-500/50 transition-colors">
-                            <span className="text-slate-500 block mb-1">Attention Priority</span>
-                            <div className="text-amber-500 font-bold text-lg">HIGH (0.84)</div>
+                            <span className="text-slate-500 block mb-1">Decision Pressure</span>
+                            <div className="text-amber-500 font-bold text-lg font-black tracking-tighter">MODERATE (0.42)</div>
                          </div>
                          <div className="pt-2 border-t border-slate-800 space-y-1">
-                            <span className="text-slate-600 text-[8px] font-black uppercase">Cognitive Load Index</span>
+                            <span className="text-slate-600 text-[8px] font-black uppercase">Consensus Coherence</span>
                             <div className="grid grid-cols-5 gap-0.5 h-1">
                                {[0.8, 0.9, 0.7, 0.4, 0.2].map((a, i) => (
-                                 <div key={i} className={`h-full rounded-full ${a > 0.5 ? 'bg-indigo-500' : 'bg-slate-800'}`} />
+                                 <div key={i} className={`h-full rounded-full ${a > 0.5 ? 'bg-indigo-500 shadow-[0_0_5px_#6366f1]' : 'bg-slate-800'}`} />
                                ))}
                             </div>
                          </div>
@@ -156,19 +157,38 @@ const App: React.FC = () => {
              </div>
           </main>
         )}
+        {activeWorkspace === 'macro' && (
+          <main className="h-full grid grid-cols-12 gap-0.5 p-0.5 bg-slate-900/10">
+             <div className="col-span-4 overflow-hidden"><MacroPanel /></div>
+             <div className="col-span-8 overflow-hidden">
+                <Panel title="Ecosystem structural Propagation Map">
+                   <div className="w-full h-full bg-slate-950 flex items-center justify-center p-10 relative">
+                      <div className="relative w-96 h-96 border border-slate-900 rounded-full border-dashed animate-spin-slow opacity-20 shadow-[inset_0_0_50px_rgba(79,70,229,0.1)]" />
+                      <div className="absolute flex flex-col items-center">
+                         <span className="text-indigo-500 font-black text-xs uppercase tracking-widest animate-pulse drop-shadow-glow">Synchronizing Ecosystem Intelligence...</span>
+                         <span className="text-slate-700 text-[9px] mt-2 font-mono font-bold tracking-tighter uppercase">CROSS_DOMAIN_COGNITION: ACTIVE</span>
+                      </div>
+                      <div className="absolute top-20 left-40 w-12 h-12 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-[9px] font-black shadow-glow">POLY</div>
+                      <div className="absolute bottom-20 right-40 w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-[9px] font-black shadow-glow">BINANCE</div>
+                      <div className="absolute top-40 right-20 w-12 h-12 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-[9px] font-black shadow-glow">VIX</div>
+                   </div>
+                </Panel>
+             </div>
+          </main>
+        )}
       </div>
 
       {/* Status Bar */}
       <footer className="h-6 bg-slate-950 border-t border-slate-800 flex items-center px-4 justify-between font-mono text-[9px] text-slate-500 uppercase">
         <div className="flex gap-6 items-center">
-           <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div> CORE: V2.5-META</span>
-           <span>Database: <span className="text-green-500/70 uppercase">Cognition_Synced_Ok</span></span>
+           <span className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_5px_#6366f1]"></div> CORE: V2.7-DECISION</span>
+           <span>Database: <span className="text-green-500/70 uppercase font-black">Reliability_Verified</span></span>
            <span>EventBus: <span className="text-slate-300">142 msg/sec</span></span>
         </div>
         <div className="flex gap-6 items-center">
-           <span>Memory_Index: <span className="text-slate-300 underline decoration-dotted decoration-slate-700">4,284 Archetypes</span></span>
-           <span className="text-indigo-500 font-black animate-pulse tracking-widest italic">Awaiting_Instructions...</span>
-           <span className="bg-indigo-900/20 text-indigo-400 px-2 rounded font-black border border-indigo-500/20 tracking-tighter">NODE_V22.22</span>
+           <span>Memory_Index: <span className="text-slate-300 underline decoration-dotted decoration-slate-700 font-bold tracking-tighter">8,421 Scenarios</span></span>
+           <span className="text-indigo-500 font-black animate-pulse tracking-widest italic">PROBABILISTIC_COGNITION_ACTIVE</span>
+           <span className="bg-indigo-900/20 text-indigo-400 px-2 rounded font-black border border-indigo-500/20 tracking-tighter shadow-glow">V22.22.1</span>
         </div>
       </footer>
     </div>
