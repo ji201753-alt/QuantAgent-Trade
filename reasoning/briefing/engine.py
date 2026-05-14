@@ -10,27 +10,30 @@ class BriefingEngine:
     Grounded strictly in existing contextual and decision data.
     """
     def generate_briefing(self, context: MarketContext, decision: DecisionIntelligence, chronology: Optional[List[Dict]] = None) -> OperationalBriefing:
+        """
+        Synthesizes cross-market findings, ecosystem chronology, and structural decision intelligence.
+        """
         # 1. Grounded Context Summary
         summary = f"Regime: {context.regime.primary_regime.upper()}. {context.situational_summary}"
 
-        # 2. Instability Notes
+        # 2. Instability & Operational Pressure
         instability = "Stable"
         if decision.confidence.is_collapsing: instability = "CRITICAL_COLLAPSE_RISK"
         elif decision.operational_pressure > 0.7: instability = "ELEVATED_DECISION_PRESSURE"
 
-        # 3. Chronology Synthesis
+        # 3. Chronology & Cross-Domain Synthesis
         chron_summary = ""
         if chronology:
-            recent = [e for e in chronology[-5:] if e['severity'] in ['high', 'critical']]
-            if recent:
-                chron_summary = f"Chronology indicates {len(recent)} critical precursors in previous interval."
+            critical_events = [e for e in chronology[-10:] if e['severity'] in ['high', 'critical']]
+            if critical_events:
+                chron_summary = f"Chronology confirms {len(critical_events)} high-severity catalysts aligning with current instability."
 
-        # 4. Uncertainty Landscape
-        uncertainty = f"Aggregated uncertainty at {context.aggregated_uncertainty:.2f}. {chron_summary} "
+        # 4. Global Uncertainty Landscape
+        uncertainty = f"Systemic uncertainty at {context.aggregated_uncertainty:.2f}. {chron_summary} "
         if decision.consensus.agreement_score < 0.5:
-            uncertainty += f"Systemic disagreement detected between {', '.join(decision.consensus.divergent_systems)}."
+            uncertainty += f"Divergence detected in {', '.join(decision.consensus.divergent_systems)}."
         else:
-            uncertainty += "High system consensus on current hypothesis."
+            uncertainty += "Consensus coherence remains established."
 
         return OperationalBriefing(
             id=f"brf_{int(datetime.now().timestamp())}",

@@ -7,6 +7,9 @@ from forecasting.services.forecast_service import ForecastService
 from signals.services.signal_service import SignalService
 from decision.services.decision_service import DecisionCognitionService
 from meta.services.meta_service import MetaIntelligenceService
+from macro.services.macro_service import MacroIntelligenceService
+from core.chronology import UnifiedChronologyService
+from investigations.cases.manager import InvestigationManager
 from api.app import create_app
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -22,6 +25,9 @@ async def main():
     signals = SignalService(event_bus)
     decision = DecisionCognitionService(event_bus)
     meta = MetaIntelligenceService(event_bus)
+    macro = MacroIntelligenceService(event_bus)
+    chronology = UnifiedChronologyService(event_bus)
+    investigations = InvestigationManager()
 
     # Start Services
     services = [
@@ -31,7 +37,9 @@ async def main():
         forecasting.start(),
         signals.start(),
         decision.start(),
-        meta.start()
+        meta.start(),
+        macro.start(),
+        chronology.start()
     ]
 
     # Start API/WebSocket Server

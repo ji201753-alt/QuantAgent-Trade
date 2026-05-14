@@ -15,8 +15,9 @@ export const theme = {
       info: '#3b82f6',
       instability: '#ec4899',
       confidence: '#6366f1',
-      uncertainty: '#cbd5e1',
-      pressure: '#8b5cf6',
+      uncertainty: '#94a3b8',
+      pressure: '#a855f7',
+      neutral: '#334155',
     },
     glow: {
       primary: 'rgba(99, 102, 241, 0.2)',

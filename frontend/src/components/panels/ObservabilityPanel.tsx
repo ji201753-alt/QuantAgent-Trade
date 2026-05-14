@@ -1,11 +1,17 @@
 import React from 'react';
 import { useTerminalStore } from '../../state/terminalState';
-import { Panel } from '../layout/Panel';
+import { CinematicPanel } from '../layout/CinematicPanel';
+import { theme } from '../../theme';
+import { Activity, ShieldCheck, Database, Zap } from 'lucide-react';
 
 export const ObservabilityPanel: React.FC = () => {
-  const isConnected = useTerminalStore(state => state.isConnected);
+  const { stats, isConnected } = useTerminalStore();
+
   return (
-    <Panel title="System Observability">
+    <CinematicPanel
+      title="System Observability & Diagnostics"
+      statusColor={isConnected ? theme.colors.semantic.success : theme.colors.semantic.error}
+    >
       <div className="p-3 font-mono text-[9px] space-y-3 uppercase">
         <div className="flex justify-between items-center bg-slate-900/50 p-2 rounded border border-slate-800">
           <span className="text-slate-500">Sync_Status</span>
@@ -24,6 +30,6 @@ export const ObservabilityPanel: React.FC = () => {
            </div>
         </div>
       </div>
-    </Panel>
+    </CinematicPanel>
   );
 };

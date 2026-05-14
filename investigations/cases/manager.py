@@ -54,13 +54,26 @@ class InvestigationManager:
             case.updated_at = datetime.now()
             self._save_to_disk(case)
 
-    def attach_evidence(self, case_id: str, evidence_type: str, data: Any):
+    def attach_evidence(self, case_id: str, evidence_type: str, data: Any, metadata: Optional[Dict] = None):
         if case_id in self.cases:
             case = self.cases[case_id]
             case.evidence_references.append({
                 "type": evidence_type,
                 "timestamp": datetime.now().isoformat(),
-                "data": data
+                "data": data,
+                "metadata": metadata or {}
+            })
+            case.updated_at = datetime.now()
+            self._save_to_disk(case)
+
+    def bookmark_replay(self, case_id: str, timestamp: datetime, label: str):
+        if case_id in self.cases:
+            case = self.cases[case_id]
+            case.annotations.append({
+                "type": "replay_bookmark",
+                "timestamp": timestamp.isoformat(),
+                "label": label,
+                "created_at": datetime.now().isoformat()
             })
             case.updated_at = datetime.now()
             self._save_to_disk(case)

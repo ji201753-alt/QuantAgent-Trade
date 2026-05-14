@@ -12,4 +12,3 @@ lightweight-charts
 pytest
 pytest-asyncio
 playwright
-EOF
