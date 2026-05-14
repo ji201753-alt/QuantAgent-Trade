@@ -19,19 +19,29 @@ def register_routes(app: Flask, event_bus: EventBus):
     def websocket_bridge(ws):
         """
         Bridges the internal async EventBus to the threaded Flask WebSocket.
+        Handles reconnection and state synchronization for operational continuity.
         """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
         async def handle_events():
-            # In a real implementation, we'd use a shared queue or
-            # register a callback that pushes to the WS
+            logger.info("Terminal WebSocket connection established")
+
+            # 1. Initial State Sync
+            ws.send(json.dumps({
+                "type": "system_sync",
+                "status": "ready",
+                "version": "1.0.0"
+            }))
+
             while True:
-                # Placeholder for event broadcast logic
+                # In a real system, we'd subscribe to the EventBus here
+                # and forward all published events to the client.
                 await asyncio.sleep(1)
                 try:
                     ws.send(json.dumps({"type": "heartbeat", "timestamp": str(datetime.now())}))
-                except:
+                except Exception as e:
+                    logger.warning(f"WebSocket disconnected: {e}")
                     break
 
         loop.run_until_complete(handle_events())

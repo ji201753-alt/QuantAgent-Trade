@@ -1,35 +1,38 @@
-# Quant Intelligence Workstation (v1.0-RC)
+# Quant Intelligence Workstation (v1.0)
 
-An institutional-grade, local-first quantitative market intelligence and operational investigation workstation focused on market microstructure, probabilistic forecasting, and ecosystem cognition.
+A durable, extensible, and institutional-grade operational platform for quantitative market intelligence and forensic investigation.
 
 ## 🚀 Overview
 
-The workstation is a production-grade environment designed for high-fidelity market intelligence. It transforms raw ingestion into contextual cognition through a multi-layered quantitative core, providing operators with immersive situational awareness and forensic investigation tools.
+The workstation is a production-grade environment designed for high-fidelity market intelligence. It transforms raw ingestion into contextual cognition through a modular quantitative core, providing operators with immersive situational awareness and publication-quality forensic investigation tools.
 
-### Core Intelligence Systems
-- **Ecosystem Ingestion**: Resilient ingestion for crypto, prediction markets, and macro calendars with normalized universal schemas.
-- **Microstructure Analytics**: Real-time engines for orderbook imbalance, liquidity concentration, and volatility expansion.
-- **Probabilistic Forecasting**: Multi-horizon inference integrated via lazy-loading (TimesFM).
-- **Unified Chronology**: Persistent, synchronized timeline of all operational events and external catalysts.
-- **Structural Memory**: Fingerprinting and similarity engines for historical analog discovery.
-- **Decision Cognition**: Modeling of structural confidence, consensus coherence, and fragility.
-- **Grounded Reasoning**: LLM-assisted investigation co-pilot strictly grounded in system intelligence.
+### Core Platform Architecture
+- **Extensible Registry**: Modular component discovery for connectors, analytics, and reasoning engines.
+- **Ecosystem Ingestion**: Resilient connectors for crypto, prediction markets, and macro catalysts.
+- **Unified Chronology**: Persistent, searchable timeline of all operational events and external catalysts.
+- **Forensic Investigation**: Professional case management with branching analysis trees and publication-quality exports.
+- **Comparative Intelligence**: High-speed structural search and side-by-side analog comparison.
+- **Institutional UX**: Cinematic terminal environment with workspace composition and layout presets.
 
-## 🖥 Workstation UX & Investigation
+## 🛠 Platform Extension Model
 
-- **Forensic Workspaces**:
-    - **Real-time Monitoring**: High-frequency flow and signal intelligence.
-    - **Comparison Workbench**: Side-by-side analysis of live vs. historical market states.
-    - **Ecosystem Intelligence**: Systemic contagion and liquidity migration tracking.
-    - **Operational Investigation**: Professional case management and forensic branching.
-- **Cinematic Experience**: Reactive motion, layered depth, and subconscious visual feedback systems.
-- **Professional Tooling**: Comprehensive evidence management, replay bookmarking, and analytical report exports.
+The platform is designed for modular evolution via the `ComponentRegistry`:
+- **Connectors**: Add new market domains using normalized schemas.
+- **Analytics**: Register custom microstructure or statistical engines.
+- **Reasoning**: Attach specialized investigative assistants grounded in system intelligence.
+
+## 🖥 Operational Workflows
+
+- **Forensic Analysis**: Conduct multi-threaded investigations using parent/child case branching and integrated replay.
+- **Ecosystem Monitoring**: Track systemic contagion and liquidity migration across correlated market domains.
+- **Historical Search**: Discover historical structural analogs using contextual fingerprinting and similarity indexing.
+- **Publication Reporting**: Export professional-grade analytical reports with structured evidence chains and grounded narratives.
 
 ## 🛡 Operational Philosophy
 
-- **Local-First**: All data, intelligence, and models are executed locally. Zero cloud dependency.
-- **Probabilistic**: Focus on uncertainty and pressure to support human decision-making.
-- **Grounded**: AI components are restricted to synthesizing quantified intelligence—no autonomous trading.
+- **Local-First**: All data, memory, and models are executed locally. Zero mandatory cloud dependency.
+- **Durable Continuity**: Automatic recovery from interruptions and session-aware state hydration.
+- **Probabilistic & Grounded**: AI components are restricted to evidence-based synthesis—no autonomous trading or predictive hallucinations.
 
 ## ⚙️ Getting Started
 
@@ -43,8 +46,8 @@ The workstation is a production-grade environment designed for high-fidelity mar
 2. `cd frontend && npm install`
 
 ### Execution
-1. Start Engine: `python -m core.engine`
+1. Start Core: `python -m core.engine`
 2. Start Terminal: `cd frontend && npm run dev`
 
 ---
-*v1.0 Release Candidate — Institutional Market Intelligence OS.*
+*v1.0 — Institutional Market Intelligence Platform.*

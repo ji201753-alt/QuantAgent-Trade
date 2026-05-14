@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from core.event_bus import EventBus
+from core.registry import registry
 from core.ingestion_service import IngestionService
 from analytics.pipeline import AnalyticsPipeline
 from forecasting.services.forecast_service import ForecastService
@@ -18,29 +19,22 @@ logger = logging.getLogger(__name__)
 async def main():
     event_bus = EventBus()
 
-    # Initialize Core Services
-    ingestion = IngestionService(event_bus)
-    analytics = AnalyticsPipeline(event_bus)
-    forecasting = ForecastService(event_bus)
-    signals = SignalService(event_bus)
-    decision = DecisionCognitionService(event_bus)
-    meta = MetaIntelligenceService(event_bus)
-    macro = MacroIntelligenceService(event_bus)
-    chronology = UnifiedChronologyService(event_bus)
+    # Register core platform components
+    registry.register("services", "ingestion", IngestionService)
+    registry.register("services", "analytics", AnalyticsPipeline)
+    registry.register("services", "forecasting", ForecastService)
+    registry.register("services", "signals", SignalService)
+    registry.register("services", "decision", DecisionCognitionService)
+    registry.register("services", "meta", MetaIntelligenceService)
+    registry.register("services", "macro", MacroIntelligenceService)
+    registry.register("services", "chronology", UnifiedChronologyService)
+
+    # Instantiate via Registry for platform extensibility
+    instances = registry.instantiate_all("services", event_bus)
     investigations = InvestigationManager()
 
     # Start Services
-    services = [
-        event_bus.start(),
-        ingestion.start(),
-        analytics.start(),
-        forecasting.start(),
-        signals.start(),
-        decision.start(),
-        meta.start(),
-        macro.start(),
-        chronology.start()
-    ]
+    services = [event_bus.start()] + [inst.start() for inst in instances if hasattr(inst, 'start')]
 
     # Start API/WebSocket Server
     app = create_app(event_bus)

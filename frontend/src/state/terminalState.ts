@@ -107,10 +107,12 @@ interface TerminalState {
   setReplayMode: (active: boolean, time?: string) => void;
   setReplaySpeed: (speed: number) => void;
 
-  // Workspace Persistence
+  // Workspace Composition & Presets
   workspaceConfig: Record<string, any>;
+  workspacePresets: Array<{ id: string; name: string; layout: any }>;
   saveWorkspaceLayout: (workspaceId: string, layout: any) => void;
   loadWorkspaceLayout: (workspaceId: string) => any;
+  savePreset: (name: string, layout: any) => void;
 
   // Interactivity & Cross-Layer Linking
   highlightedPrice: number | null;
@@ -183,12 +185,18 @@ export const useTerminalStore = create<TerminalState>((set) => ({
   })),
 
   workspaceConfig: JSON.parse(localStorage.getItem('quant_workspaces') || '{}'),
+  workspacePresets: JSON.parse(localStorage.getItem('quant_presets') || '[]'),
   saveWorkspaceLayout: (workspaceId, layout) => set((state) => {
     const newConfig = { ...state.workspaceConfig, [workspaceId]: layout };
     localStorage.setItem('quant_workspaces', JSON.stringify(newConfig));
     return { workspaceConfig: newConfig };
   }),
   loadWorkspaceLayout: (workspaceId) => (get() as any).workspaceConfig[workspaceId],
+  savePreset: (name, layout) => set((state) => {
+    const newPresets = [...state.workspacePresets, { id: Date.now().toString(), name, layout }];
+    localStorage.setItem('quant_presets', JSON.stringify(newPresets));
+    return { workspacePresets: newPresets };
+  }),
 
   highlightedPrice: null,
   setHighlightedPrice: (price) => set({ highlightedPrice: price }),
