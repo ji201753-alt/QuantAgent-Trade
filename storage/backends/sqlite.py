@@ -94,3 +94,11 @@ class SQLiteRepository(DataRepository):
 
     async def get_ohlcv(self, symbol: str, limit: int) -> List[OHLCV]:
         return []
+
+    async def get_trades(self, symbol: str, start: datetime, end: datetime) -> List[TradeEvent]:
+        # Implementation for historical trade retrieval
+        return []
+
+    async def get_orderbooks(self, symbol: str, start: datetime, end: datetime) -> List[OrderBookSnapshot]:
+        # Implementation for historical orderbook retrieval
+        return []

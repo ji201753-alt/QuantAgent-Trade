@@ -1,10 +1,17 @@
 import React from 'react';
 import { useTerminalStore } from '../../state/terminalState';
-import { Panel } from '../layout/Panel';
+import { CinematicPanel } from '../layout/CinematicPanel';
+import { theme } from '../../theme';
 
 export const DecisionPanel: React.FC = () => {
+  const { decisionIntelligence } = useTerminalStore();
+  const isCollapsing = decisionIntelligence?.confidence.is_collapsing;
+
   return (
-    <Panel title="Decision Cognition & Uncertainty">
+    <CinematicPanel
+      title="Decision Cognition & Uncertainty"
+      statusColor={isCollapsing ? theme.colors.semantic.error : undefined}
+    >
       <div className="p-3 font-mono text-[10px] space-y-4 overflow-y-auto h-full">
         {/* Consensus State */}
         <div className="bg-slate-900 border border-slate-800 p-2 rounded relative group">
@@ -52,6 +59,6 @@ export const DecisionPanel: React.FC = () => {
            </div>
         </div>
       </div>
-    </Panel>
+    </CinematicPanel>
   );
 };

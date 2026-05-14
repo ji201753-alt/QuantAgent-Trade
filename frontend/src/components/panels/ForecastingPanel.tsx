@@ -1,4 +1,5 @@
 import React from 'react';
+import { Panel } from '../layout/Panel';
 
 const ForecastHorizon: React.FC<{ horizon: string; value: number; uncertainty: number }> = ({ horizon, value, uncertainty }) => (
   <div className="flex flex-col border-l-2 border-indigo-500 pl-3 bg-indigo-500/5 py-2 mb-2 group hover:bg-indigo-500/10 transition-colors">
@@ -25,6 +26,12 @@ const ForecastHorizon: React.FC<{ horizon: string; value: number; uncertainty: n
 
 export const ForecastingPanel: React.FC = () => {
   return (
+    <Panel
+      title="Probabilistic Forecasts (TimesFM)"
+      helpTitle="Forecasting Layer"
+      helpExplanation="Probabilistic multi-horizon inference. These forecasts represent expected price distribution, with wide bands indicating high uncertainty."
+      helpRelationship="Forecasting divergence from microstructure pressure often precedes high-magnitude volatility events."
+    >
     <div className="flex flex-col h-full text-slate-100 font-mono text-xs overflow-hidden p-2">
       <div className="text-slate-500 mb-3 italic text-[9px] uppercase tracking-tighter">Realtime multi-horizon TimesFM inference</div>
       <div className="space-y-1">
@@ -37,5 +44,6 @@ export const ForecastingPanel: React.FC = () => {
          <span>INFERENCE_OK</span>
       </div>
     </div>
+    </Panel>
   );
 };

@@ -26,3 +26,11 @@ class DataRepository(ABC):
     @abstractmethod
     async def save_signal(self, signal: SignalEvent):
         pass
+
+    @abstractmethod
+    async def get_trades(self, symbol: str, start: datetime, end: datetime) -> List[TradeEvent]:
+        pass
+
+    @abstractmethod
+    async def get_orderbooks(self, symbol: str, start: datetime, end: datetime) -> List[OrderBookSnapshot]:
+        pass

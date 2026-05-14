@@ -1,9 +1,14 @@
 import React from 'react';
-import { Panel } from '../layout/Panel';
+import { CinematicPanel } from '../layout/CinematicPanel';
 
 export const ReasoningPanel: React.FC = () => {
   return (
-    <Panel title="Operational Reasoning & Briefing">
+    <CinematicPanel
+      title="Operational Reasoning & Briefing"
+      helpTitle="Institutional Reasoning Layer"
+      helpExplanation="Grounded operational briefings synthesized from cross-layer intelligence. These provide high-level situational awareness beyond raw metrics."
+      helpRelationship="Reasoning is strictly grounded in the Decision Cognition and Contextual layers."
+    >
       <div className="p-3 font-mono text-[10px] space-y-4 overflow-y-auto h-full select-text">
         <div className="bg-slate-900 border border-slate-800 p-3 rounded shadow-lg relative group">
            <div className="absolute top-0 right-0 p-2 opacity-20">
@@ -40,6 +45,6 @@ export const ReasoningPanel: React.FC = () => {
            </button>
         </div>
       </div>
-    </Panel>
+    </CinematicPanel>
   );
 };

@@ -1,4 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { Panel } from '../layout/Panel';
+import { theme } from '../../theme';
 
 const MetricRow: React.FC<{ label: string; value: string | number; color: string; percent?: number }> = ({ label, value, color, percent }) => (
   <div className="group">
@@ -8,7 +11,12 @@ const MetricRow: React.FC<{ label: string; value: string | number; color: string
     </div>
     {percent !== undefined && (
       <div className="h-1.5 bg-slate-800 rounded-sm relative overflow-hidden">
-        <div className={`h-full ${color} opacity-60`} style={{ width: `${percent}%` }}></div>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${percent}%` }}
+          transition={theme.transitions.default}
+          className={`h-full ${color.replace('text-', 'bg-')} opacity-60`}
+        />
       </div>
     )}
   </div>
@@ -16,6 +24,11 @@ const MetricRow: React.FC<{ label: string; value: string | number; color: string
 
 export const MicrostructurePanel: React.FC = () => {
   return (
+    <Panel
+      title="Microstructure Analytics"
+      helpTitle="Realtime Microstructure"
+      helpExplanation="Analyzes high-frequency market mechanics including orderbook pressure, liquidity concentration, and arrival rate anomalies."
+    >
     <div className="flex flex-col h-full text-slate-100 font-mono overflow-hidden p-3 space-y-4">
       <MetricRow label="Bid/Ask Imbalance" value="0.42" color="text-green-500" percent={71} />
       <div className="grid grid-cols-2 gap-4">
@@ -26,5 +39,6 @@ export const MicrostructurePanel: React.FC = () => {
         <MetricRow label="Market Pressure" value="+0.12" color="text-indigo-400" percent={56} />
       </div>
     </div>
+    </Panel>
   );
 };

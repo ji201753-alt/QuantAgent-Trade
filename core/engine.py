@@ -1,38 +1,47 @@
 import asyncio
-from typing import List, Dict, Any
-from connectors.base import MarketConnector
-from orchestration.service import OrchestrationService
-from storage.repository import DataRepository
+import logging
+from core.event_bus import EventBus
+from core.ingestion_service import IngestionService
+from analytics.pipeline import AnalyticsPipeline
+from forecasting.services.forecast_service import ForecastService
+from signals.services.signal_service import SignalService
+from decision.services.decision_service import DecisionCognitionService
+from meta.services.meta_service import MetaIntelligenceService
+from api.app import create_app
 
-class MarketIntelligenceEngine:
-    def __init__(
-        self,
-        connectors: List[MarketConnector],
-        orchestrator: OrchestrationService,
-        repository: DataRepository
-    ):
-        self.connectors = connectors
-        self.orchestrator = orchestrator
-        self.repository = repository
-        self.is_running = False
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-    async def start(self):
-        self.is_running = True
-        print("Market Intelligence Engine started.")
-        # Initialization logic (no heavy workers yet)
-        for connector in self.connectors:
-            await connector.connect()
+async def main():
+    event_bus = EventBus()
 
-    async def stop(self):
-        self.is_running = False
-        for connector in self.connectors:
-            await connector.disconnect()
-        print("Market Intelligence Engine stopped.")
+    # Initialize Core Services
+    ingestion = IngestionService(event_bus)
+    analytics = AnalyticsPipeline(event_bus)
+    forecasting = ForecastService(event_bus)
+    signals = SignalService(event_bus)
+    decision = DecisionCognitionService(event_bus)
+    meta = MetaIntelligenceService(event_bus)
 
-    async def run_forever(self):
-        await self.start()
-        try:
-            while self.is_running:
-                await asyncio.sleep(1)
-        finally:
-            await self.stop()
+    # Start Services
+    services = [
+        event_bus.start(),
+        ingestion.start(),
+        analytics.start(),
+        forecasting.start(),
+        signals.start(),
+        decision.start(),
+        meta.start()
+    ]
+
+    # Start API/WebSocket Server
+    app = create_app(event_bus)
+
+    logger.info("Starting Quant Intelligence Core...")
+    await asyncio.gather(*services)
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Shutting down...")
