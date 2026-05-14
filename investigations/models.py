@@ -21,6 +21,11 @@ class InvestigationCase:
     context_snapshots: List[Dict[str, Any]] = field(default_factory=list)
     historical_comparisons: List[str] = field(default_factory=list)
 
+    # Forensic Branching
+    parent_case_id: Optional[str] = None
+    child_case_ids: List[str] = field(default_factory=list)
+    related_catalysts: List[str] = field(default_factory=list) # IDs of macro catalysts
+
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass

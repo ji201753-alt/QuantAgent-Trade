@@ -23,7 +23,7 @@ class InvestigationManager:
         self.cases: Dict[str, InvestigationCase] = {}
         self._load_all_cases()
 
-    def create_case(self, title: str, event_id: str, start: datetime, end: datetime) -> InvestigationCase:
+    def create_case(self, title: str, event_id: str, start: datetime, end: datetime, parent_id: Optional[str] = None) -> InvestigationCase:
         case_id = str(uuid.uuid4())
         case = InvestigationCase(
             id=case_id,
@@ -32,8 +32,13 @@ class InvestigationManager:
             updated_at=datetime.now(),
             status="active",
             initial_event_id=event_id,
-            replay_interval=(start, end)
+            replay_interval=(start, end),
+            parent_case_id=parent_id
         )
+        if parent_id and parent_id in self.cases:
+            self.cases[parent_id].child_case_ids.append(case_id)
+            self._save_to_disk(self.cases[parent_id])
+
         self.cases[case_id] = case
         self._save_to_disk(case)
         return case
@@ -82,6 +87,9 @@ class InvestigationManager:
             "evidence_references": case.evidence_references,
             "context_snapshots": case.context_snapshots,
             "historical_comparisons": case.historical_comparisons,
+            "parent_case_id": case.parent_case_id,
+            "child_case_ids": case.child_case_ids,
+            "related_catalysts": case.related_catalysts,
             "metadata": case.metadata
         }
         with open(path, 'w') as f:
@@ -112,6 +120,9 @@ class InvestigationManager:
                             evidence_references=data.get("evidence_references", []),
                             context_snapshots=data.get("context_snapshots", []),
                             historical_comparisons=data.get("historical_comparisons", []),
+                            parent_case_id=data.get("parent_case_id"),
+                            child_case_ids=data.get("child_case_ids", []),
+                            related_catalysts=data.get("related_catalysts", []),
                             metadata=data.get("metadata", {})
                         )
                         self.cases[case.id] = case

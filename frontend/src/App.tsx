@@ -13,11 +13,13 @@ import { AnomalyPanel } from './components/panels/AnomalyPanel';
 import { ContextPanel } from './components/panels/ContextPanel';
 import { MetaPanel } from './components/panels/MetaPanel';
 import { MacroPanel } from './components/panels/MacroPanel';
+import { MacroEcosystemPanel } from './components/panels/MacroEcosystemPanel';
 import { DecisionPanel } from './components/panels/DecisionPanel';
 import { ReasoningPanel } from './components/panels/ReasoningPanel';
 import { InvestigationPanel } from './components/panels/InvestigationPanel';
 import { HighFrequencyChart } from './components/charts/HighFrequencyChart';
 import { FactorExplorer } from './components/research/FactorExplorer';
+import { ComparisonWorkbench } from './components/research/ComparisonWorkbench';
 import { AlertTimeline } from './components/alerts/AlertTimeline';
 import { ReplayControl } from './components/replay/ReplayControl';
 import { Panel } from './components/layout/Panel';
@@ -150,9 +152,9 @@ const App: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
-            className="h-full p-1"
+            className="h-full"
           >
-            <FactorExplorer />
+            <ComparisonWorkbench />
           </motion.div>
         )}
 
@@ -192,25 +194,7 @@ const App: React.FC = () => {
             transition={{ duration: 0.2 }}
             className="h-full"
           >
-          <main className="h-full grid grid-cols-12 gap-1 p-1 bg-black">
-             <div className="col-span-4 overflow-hidden border-r border-slate-900"><MacroPanel /></div>
-             <div className="col-span-8 overflow-hidden relative group">
-                <Panel title="Ecosystem Structural Propagation Map">
-                   <div className="w-full h-full bg-slate-950 flex items-center justify-center p-10 relative">
-                      <div className="relative w-[500px] h-[500px] border border-slate-900 rounded-full border-dashed animate-spin-slow opacity-20" />
-                      <div className="absolute flex flex-col items-center">
-                         <span className="text-indigo-500 font-black text-xs uppercase tracking-[0.3em] animate-pulse drop-shadow-glow">Synchronizing Ecosystem Intelligence...</span>
-                         <span className="text-slate-700 text-[10px] mt-4 font-mono font-bold tracking-tighter uppercase opacity-60">CROSS_DOMAIN_COGNITION: ACTIVE</span>
-                      </div>
-                      {/* Domain Nodes */}
-                      <div className="absolute top-20 left-60 w-14 h-14 rounded-full bg-indigo-500/10 border border-indigo-500/40 flex items-center justify-center text-[10px] font-black shadow-glow group-hover:scale-110 transition-transform duration-500">POLY</div>
-                      <div className="absolute bottom-24 right-60 w-14 h-14 rounded-full bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-[10px] font-black shadow-glow group-hover:scale-110 transition-transform duration-500 delay-75">BINANCE</div>
-                      <div className="absolute top-1/2 right-20 w-14 h-14 rounded-full bg-red-500/10 border border-red-500/40 flex items-center justify-center text-[10px] font-black shadow-glow text-shadow-glow group-hover:scale-110 transition-transform duration-500 delay-150">VIX</div>
-                      <div className="absolute bottom-1/3 left-20 w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-[10px] font-black shadow-glow group-hover:scale-110 transition-transform duration-500 delay-200">FOREX</div>
-                   </div>
-                </Panel>
-             </div>
-          </main>
+            <MacroEcosystemPanel />
           </motion.div>
         )}
         </AnimatePresence>

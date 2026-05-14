@@ -38,6 +38,13 @@ async def main():
     app = create_app(event_bus)
 
     logger.info("Starting Quant Intelligence Core...")
+
+    # Run Flask in a separate thread to not block the event loop
+    import threading
+    api_thread = threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False))
+    api_thread.daemon = True
+    api_thread.start()
+
     await asyncio.gather(*services)
 
 if __name__ == "__main__":

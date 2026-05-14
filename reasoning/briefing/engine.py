@@ -9,7 +9,7 @@ class BriefingEngine:
     Generates operational briefings by synthesizing quantified intelligence.
     Grounded strictly in existing contextual and decision data.
     """
-    def generate_briefing(self, context: MarketContext, decision: DecisionIntelligence) -> OperationalBriefing:
+    def generate_briefing(self, context: MarketContext, decision: DecisionIntelligence, chronology: Optional[List[Dict]] = None) -> OperationalBriefing:
         # 1. Grounded Context Summary
         summary = f"Regime: {context.regime.primary_regime.upper()}. {context.situational_summary}"
 
@@ -18,8 +18,15 @@ class BriefingEngine:
         if decision.confidence.is_collapsing: instability = "CRITICAL_COLLAPSE_RISK"
         elif decision.operational_pressure > 0.7: instability = "ELEVATED_DECISION_PRESSURE"
 
-        # 3. Uncertainty Landscape
-        uncertainty = f"Aggregated uncertainty at {context.aggregated_uncertainty:.2f}. "
+        # 3. Chronology Synthesis
+        chron_summary = ""
+        if chronology:
+            recent = [e for e in chronology[-5:] if e['severity'] in ['high', 'critical']]
+            if recent:
+                chron_summary = f"Chronology indicates {len(recent)} critical precursors in previous interval."
+
+        # 4. Uncertainty Landscape
+        uncertainty = f"Aggregated uncertainty at {context.aggregated_uncertainty:.2f}. {chron_summary} "
         if decision.consensus.agreement_score < 0.5:
             uncertainty += f"Systemic disagreement detected between {', '.join(decision.consensus.divergent_systems)}."
         else:

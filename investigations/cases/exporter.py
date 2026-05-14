@@ -32,6 +32,10 @@ class InvestigationExporter:
             "annotations": case.annotations,
             "summaries": case.reasoning_summaries,
             "context_snapshots": case.context_snapshots,
+            "comparisons": case.historical_comparisons,
+            "parent_id": case.parent_case_id,
+            "child_ids": case.child_case_ids,
+            "macro_catalysts": case.related_catalysts,
             "metadata": case.metadata
         }
 
