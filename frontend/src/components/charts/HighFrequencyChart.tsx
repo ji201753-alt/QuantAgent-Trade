@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, ISeriesApi } from 'lightweight-charts';
+import { createChart, ColorType, ISeriesApi, SeriesMarker } from 'lightweight-charts';
+import { useTerminalStore } from '../../state/terminalState';
+import { theme } from '../../theme';
 
 interface ChartProps {
-  data: any[];
+  data?: any[];
 }
 
 export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
+  const { marketData, marketContext } = useTerminalStore();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
@@ -13,6 +16,8 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
+      handleScroll: true,
+      handleScale: true,
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#64748b',
@@ -36,11 +41,24 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
     });
 
     const candleSeries = chart.addCandlestickSeries({
-      upColor: '#22c55e',
-      downColor: '#ef4444',
+      upColor: theme.colors.semantic.success,
+      downColor: theme.colors.semantic.error,
       borderVisible: false,
-      wickUpColor: '#22c55e',
-      wickDownColor: '#ef4444',
+      wickUpColor: theme.colors.semantic.success,
+      wickDownColor: theme.colors.semantic.error,
+    });
+
+    // 1. Structural Zones Layer (Liquidity/Vol)
+    const structuralLayer = chart.addLineSeries({
+      color: theme.colors.semantic.confidence,
+      lineWidth: 1,
+      lineStyle: 2, // Dashed
+    });
+
+    // 2. Probabilistic Trajectory Layer
+    const forecastLayer = chart.addLineSeries({
+      color: theme.colors.semantic.pressure,
+      lineWidth: 2,
     });
 
     seriesRef.current = candleSeries;
@@ -54,6 +72,25 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
       close: 0.5405 + Math.random() * 0.01,
     }));
     candleSeries.setData(mockData);
+
+    // 3. Kronos Structural Cognitive Markers
+    const markers: SeriesMarker<any>[] = [
+      {
+        time: mockData[ mockData.length - 20 ].time,
+        position: 'aboveBar',
+        color: theme.colors.semantic.instability,
+        shape: 'arrowDown',
+        text: 'Structural_Recurrence_Match',
+      },
+      {
+        time: mockData[ mockData.length - 10 ].time,
+        position: 'belowBar',
+        color: theme.colors.semantic.info,
+        shape: 'circle',
+        text: 'Regime_Transition',
+      }
+    ];
+    candleSeries.setMarkers(markers);
 
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current?.clientWidth });

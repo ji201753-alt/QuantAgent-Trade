@@ -1,55 +1,47 @@
-# Quant Intelligence Workstation (v1.0-RC1)
+# Quant Intelligence Workstation (v1.1)
 
-A professional, local-first operational platform for quantitative market intelligence and forensic investigation. Designed for high-fidelity situational awareness, historical reconstruction, and ecosystem cognition.
+An immersive, professional-grade operational platform for quantitative market intelligence and forensic investigation. Designed for high-fidelity situational awareness, historical reconstruction, and cinematic ecosystem cognition.
 
-## 🚀 Key Features
+## 🚀 Immersive Operational Engine
 
-- **Institutional Microstructure Core**: Real-time engines for orderbook imbalance, liquidity concentration, and structural volatility.
-- **Forensic Investigation System**: Multi-threaded case management with evidence-chain building and publication-quality exports.
-- **Unified Market Chronology**: A persistent timeline correlating internal signals with external macro catalysts.
-- **Deterministic Historical Replay**: Cinematic reconstruction of market states with full synchronization across analytical layers.
-- **Ecosystem Cognition**: Systemic tracking of cross-domain pressure, structural contagion, and liquidity migration.
-- **Grounded Investigation Copilot**: AI-assisted briefings strictly grounded in quantified system intelligence.
+The workstation transforms complex market microstructure into a unified operational surface.
+
+- **Unified Intelligence Surface**: The charting environment is the central surface where forecasting, structural pressure, and contextual reasoning visually converge.
+- **Layered Intelligence**:
+    - **Structural Zones**: Visualizes liquidity concentration and volatility expansion boundaries.
+    - **Probabilistic Trajectories**: Dynamic multi-horizon forecast rendering with uncertainty shading.
+    - **Kronos Cognitive Markers**: Direct on-chart visualization of historical structural analogs and regime transitions.
+- **Cinematic Experience**: Reactive environmental lighting, layered glass aesthetics, and subconscious visual feedback for structural instability.
+- **Grounded Reasoning & Forensic Drill-Down**: Interactive briefings with direct links to chart event markers and evidence chains.
+
+## 🧠 Model Orchestration (TimesFM & Kronos)
+
+The workstation supports professional local-first model execution:
+
+### TimesFM Setup
+1. **Model Weights**: Place model checkpoints in `checkpoints/timesfm-1.0-200m/`.
+2. **Inference Acceleration**: The system automatically detects CUDA-capable GPUs with automatic fallback to CPU.
+3. **Runtime Activation**: Enable via `config/settings.yaml` under `forecasting.timesfm.enabled: true`.
+4. **Diagnostics**: Real-time monitoring of inference latency and model status in the Observability Panel.
+
+### Kronos Structural Cognition
+- **Fingerprinting**: Local-first generation of multi-factor structural embeddings.
+- **Analogs**: Real-time indexing of historical structural fingerprints for high-speed similarity search.
 
 ## 🛠 Platform Architecture
 
-The system is built on a modular, async-first quantitative core:
-- `/core`: Registry-based service orchestration and high-throughput EventBus.
+- `/core`: Registry-based service orchestration and health monitoring.
 - `/connectors`: Resilient market adapters (Polymarket CLOB, Crypto).
 - `/analytics`: Quantitative engines for real-time microstructure synthesis.
-- `/forecasting`: Probabilistic inference and ensemble models (TimesFM).
-- `/investigations`: Forensic case management and local archival.
-- `/storage`: Async-safe batched persistence (SQLite/Parquet).
-- `/frontend`: High-fidelity cinematic terminal workstation.
+- `/forecasting`: TimesFM integration and probabilistic inference orchestration.
+- `/investigations`: Forensic case management and analytical reporting.
+- `/frontend`: High-fidelity cinematic terminal (Unified Operational Surface).
 
-## ⚙️ Operational Setup
+## ⚙️ Quick Start
 
-### Prerequisites
-- **Python 3.12+**
-- **Node.js v22+**
-- **TA-Lib** (Technical Analysis Library)
-
-### Quick Start
-1. **Clone & Initialize**: Run `./install.sh` to set up dependencies and local storage.
-2. **Configure**: Edit `config/settings.yaml` to enable connectors or adjust paths.
-3. **Launch Engine**: `python -m core.engine`
-4. **Launch Terminal**: `cd frontend && npm run dev`
-
-## 🛡 Operational Philosophy
-
-- **Local-First**: All data, intelligence, and memory are executed and persisted locally. Zero cloud dependency by default.
-- **Durable Continuity**: Robust reconnection logic and session-aware state hydration for long-duration operation.
-- **Probabilistic**: Focus on uncertainty and structural pressure to support human decision-making.
-- **Grounded**: AI components are restricted to evidence-based synthesis—no autonomous trading.
-
-## 📁 Repository Structure
-- `api/`: WebSocket bridge and lightweight REST endpoints.
-- `common/`: Universal normalized market and intelligence schemas.
-- `config/`: Professional configuration management.
-- `docs/`: (Planned) Detailed extension and troubleshooting guides.
-- `macro/`: Ecosystem-level catalyst and correlation services.
-- `meta/`: Structural taxonomy and pattern evolution tracking.
-- `reasoning/`: Grounded briefings and exploration co-pilot.
+1. **Initialize**: Run `./install.sh`.
+2. **Launch Engine**: `python -m core.engine`.
+3. **Launch Terminal**: `cd frontend && npm run dev`.
 
 ---
-*v1.0 Release Candidate — Institutional Market Intelligence Platform.*
+*v1.1 — The Unified Operational Intelligence Surface.*

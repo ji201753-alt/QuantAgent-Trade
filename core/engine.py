@@ -3,7 +3,7 @@ import logging
 from core.event_bus import EventBus
 from core.registry import registry
 from core.ingestion_service import IngestionService
-from analytics.pipeline import AnalyticsPipeline
+from analytics.services.microstructure_service import MicrostructureAnalyticsService
 from forecasting.services.forecast_service import ForecastService
 from signals.services.signal_service import SignalService
 from decision.services.decision_service import DecisionCognitionService
@@ -21,7 +21,7 @@ async def main():
 
     # Register core platform components
     registry.register("services", "ingestion", IngestionService)
-    registry.register("services", "analytics", AnalyticsPipeline)
+    registry.register("services", "analytics", MicrostructureAnalyticsService)
     registry.register("services", "forecasting", ForecastService)
     registry.register("services", "signals", SignalService)
     registry.register("services", "decision", DecisionCognitionService)

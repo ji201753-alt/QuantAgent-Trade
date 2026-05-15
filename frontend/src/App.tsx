@@ -27,9 +27,11 @@ import { Panel } from './components/layout/Panel';
 type Workspace = 'realtime' | 'research' | 'operational' | 'macro';
 
 const App: React.FC = () => {
-  const { isConnected, activeSymbol } = useTerminalStore();
+  const { isConnected, activeSymbol, decisionIntelligence } = useTerminalStore();
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>('realtime');
   const [showGuidedEntry, setShowGuidedEntry] = useState(() => !localStorage.getItem('quant_onboarded'));
+
+  const isInstabilityActive = decisionIntelligence?.confidence.is_collapsing || false;
 
   useEffect(() => {
     terminalWS.connect();
@@ -41,7 +43,20 @@ const App: React.FC = () => {
   return (
     <div className={`h-screen w-screen bg-black text-slate-100 flex flex-row font-sans overflow-hidden select-none antialiased transition-all duration-1000 ${
       replayMode.isActive ? 'grayscale-[0.3] brightness-90' : ''
+    } ${
+      isInstabilityActive ? 'ring-inset ring-2 ring-red-500/20' : ''
     }`}>
+      {/* Reactive Environmental Glow */}
+      <AnimatePresence>
+        {isInstabilityActive && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-red-900 pointer-events-none z-0"
+          />
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {showGuidedEntry && (
           <GuidedEntry onComplete={() => {

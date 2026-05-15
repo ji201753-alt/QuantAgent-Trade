@@ -24,9 +24,9 @@ export const ReasoningPanel: React.FC = () => {
            <div className="bg-slate-950 p-2 rounded border border-slate-900">
               <span className="text-slate-600 font-bold uppercase text-[8px] block mb-1">Evidence_Chain</span>
               <ul className="space-y-1 text-[9px] text-slate-400">
-                 <li>• Consensus_Score: 0.92</li>
-                 <li>• Reg_Persistence: 92m</li>
-                 <li>• Anom_Cluster: Detected</li>
+                 <li className="cursor-help hover:text-indigo-400 transition-colors">• Consensus_Score: 0.92</li>
+                 <li className="cursor-help hover:text-indigo-400 transition-colors">• Reg_Persistence: 92m</li>
+                 <li className="cursor-help hover:text-indigo-400 transition-colors font-bold text-red-400">• Anom_Cluster: Detected (Anchor_A1)</li>
               </ul>
            </div>
            <div className="bg-slate-950 p-2 rounded border border-slate-900">

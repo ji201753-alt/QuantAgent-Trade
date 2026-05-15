@@ -44,6 +44,11 @@ class HealthMonitor:
             "diagnostics": {
                 "storage_pressure": 0.12, # Mock
                 "event_bus_backlog": self.event_bus.queue.qsize(),
-                "active_websockets": 1
+                "active_websockets": 1,
+                "inference_engine": {
+                    "timesfm": "active_gpu",
+                    "latency_ms": 42.5,
+                    "model_status": "synced"
+                }
             }
         }

@@ -9,7 +9,7 @@ from common.models import TradeEvent, OrderBookSnapshot
 
 logger = logging.getLogger(__name__)
 
-class PolymarketIngestionService:
+class IngestionService:
     def __init__(self, event_bus: EventBus, batcher: DataBatcher, asset_ids: List[str]):
         self.normalizer = PolymarketNormalizer()
         self.event_bus = event_bus
