@@ -22,7 +22,7 @@ export const OperationalCopilot: React.FC = () => {
     }
   ]);
   const [input, setInput] = useState('');
-  const { activeSymbol, replayMode, marketContext, activeOverlays } = useTerminalStore();
+  const { activeSymbol, replayMode, marketContext, activeOverlays, activeWorkspaceId } = useTerminalStore();
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -35,11 +35,20 @@ export const OperationalCopilot: React.FC = () => {
     const overlayCount = activeOverlays.length;
 
     setTimeout(() => {
+        let content = '';
+        if (activeWorkspaceId === 'arbitrage') {
+            content = `Analyzing regional spreads for ${activeSymbol}. Liquidity asymmetry in Argentina_ARS aligns with global mean divergence. Execution confidence remains high despite localized volatility expansion.`;
+        } else if (activeWorkspaceId === 'prediction') {
+            content = `Forensic focus: ${activeSymbol}. Probability movement aligns with structural recurrence pattern K-421. Forecasting indicates localized instability collapse in T-15m.`;
+        } else {
+            content = `Forensic focus: ${activeSymbol}. Current regime identified as ${currentRegime}. Analyzing ${overlayCount} synchronized chart layers. Replay state aligns with structural escalation.`;
+        }
+
       const response: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Forensic focus: ${activeSymbol}. Current regime identified as ${currentRegime}. Analyzing ${overlayCount} synchronized chart layers. Replay state aligns with structural escalation detected in previous analog clusters.`,
-        context: `INTELLIGENCE_OS // ${currentRegime} // ${replayMode.isActive ? 'REPLAY' : 'LIVE'}`
+        content,
+        context: `INTELLIGENCE_OS // ${activeWorkspaceId.toUpperCase()} // ${replayMode.isActive ? 'REPLAY' : 'LIVE'}`
       };
       setMessages(prev => [...prev, response]);
     }, 600);
