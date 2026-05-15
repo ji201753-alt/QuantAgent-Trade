@@ -5,6 +5,7 @@ import { terminalWS } from './services/websocket';
 import { IntelligentSidebar } from './components/layout/Sidebar';
 import { DynamicStatus } from './components/layout/Common';
 import { GuidedEntry } from './components/layout/GuidedEntry';
+import { CommandPalette } from './components/layout/CommandPalette';
 import { OrderbookPanel } from './components/panels/OrderbookPanel';
 import { MicrostructurePanel } from './components/panels/MicrostructurePanel';
 import { ForecastingPanel } from './components/panels/ForecastingPanel';
@@ -21,6 +22,7 @@ import { InvestigationPanel } from './components/panels/InvestigationPanel';
 import { HighFrequencyChart } from './components/charts/HighFrequencyChart';
 import { FactorExplorer } from './components/research/FactorExplorer';
 import { ComparisonWorkbench } from './components/research/ComparisonWorkbench';
+import { AnalogInvestigationWorkspace } from './components/research/AnalogInvestigationWorkspace';
 import { AlertTimeline } from './components/alerts/AlertTimeline';
 import { ReplayControl } from './components/replay/ReplayControl';
 import { Panel } from './components/layout/Panel';
@@ -66,6 +68,8 @@ const App: React.FC = () => {
           }} />
         )}
       </AnimatePresence>
+
+      <CommandPalette />
 
       <IntelligentSidebar activeWorkspace={activeWorkspace} setActiveWorkspace={setActiveWorkspace} />
 
@@ -170,7 +174,7 @@ const App: React.FC = () => {
             transition={{ duration: 0.2 }}
             className="h-full"
           >
-            <ComparisonWorkbench />
+            <AnalogInvestigationWorkspace />
           </motion.div>
         )}
 

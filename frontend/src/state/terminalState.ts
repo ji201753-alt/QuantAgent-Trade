@@ -130,6 +130,14 @@ interface TerminalState {
     metadata: any;
   };
   setContextualFocus: (type: any, id: any, metadata?: any) => void;
+
+  // Unified Overlay Orchestration
+  activeOverlays: string[];
+  toggleOverlay: (overlayId: string) => void;
+
+  // Command & Navigation State
+  isCommandPaletteOpen: boolean;
+  setCommandPalette: (open: boolean) => void;
 }
 
 export const useTerminalStore = create<TerminalState>((set) => ({
@@ -228,4 +236,14 @@ export const useTerminalStore = create<TerminalState>((set) => ({
   setContextualFocus: (type, id, metadata) => set({
     contextualFocus: { type, id, metadata: metadata || null }
   }),
+
+  activeOverlays: ['candlesticks', 'zones'],
+  toggleOverlay: (id) => set((state) => ({
+    activeOverlays: state.activeOverlays.includes(id)
+      ? state.activeOverlays.filter(o => o !== id)
+      : [...state.activeOverlays, id]
+  })),
+
+  isCommandPaletteOpen: false,
+  setCommandPalette: (open) => set({ isCommandPaletteOpen: open }),
 }));

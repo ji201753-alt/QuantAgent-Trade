@@ -29,6 +29,24 @@ export const ObservabilityPanel: React.FC = () => {
              <span>12ms</span>
            </div>
         </div>
+
+        {/* Inference Runtime Diagnostics */}
+        <div className="pt-2 border-t border-white/5">
+           <span className="text-slate-600 font-black text-[7px] block mb-2 tracking-widest">Inference_Runtime</span>
+           <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                 <span className="text-slate-400">TimesFM_Engine</span>
+                 <span className="text-indigo-400 font-bold">ACTIVE_GPU</span>
+              </div>
+              <div className="flex justify-between items-center">
+                 <span className="text-slate-400">Inference_Lat</span>
+                 <span className="text-slate-200 font-mono">42ms</span>
+              </div>
+              <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+                 <div className="h-full bg-indigo-500 w-[82%]" />
+              </div>
+           </div>
+        </div>
       </div>
     </CinematicPanel>
   );

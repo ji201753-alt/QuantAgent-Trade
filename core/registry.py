@@ -33,9 +33,14 @@ class ComponentRegistry:
 
     def instantiate_all(self, category: str, *args, **kwargs) -> List[Any]:
         instances = []
-        for name, cls in self._categories.get(category, {}).items():
+        for name, entry in self._categories.get(category, {}).items():
             try:
-                instances.append(cls(*args, **kwargs))
+                if callable(entry) and not isinstance(entry, type):
+                    # It's a factory function
+                    instances.append(entry(*args, **kwargs))
+                else:
+                    # It's a class
+                    instances.append(entry(*args, **kwargs))
             except Exception as e:
                 logger.error(f"Failed to instantiate {category}/{name}: {e}")
         return instances

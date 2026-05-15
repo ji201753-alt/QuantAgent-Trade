@@ -22,7 +22,7 @@ export const OperationalCopilot: React.FC = () => {
     }
   ]);
   const [input, setInput] = useState('');
-  const { activeSymbol, replayMode } = useTerminalStore();
+  const { activeSymbol, replayMode, marketContext, activeOverlays } = useTerminalStore();
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -30,16 +30,19 @@ export const OperationalCopilot: React.FC = () => {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
 
-    // Simulate grounded response with enhanced context awareness
+    // Derived grounded context for copilot reasoning
+    const currentRegime = marketContext?.regime.primary_regime || "UNKNOWN";
+    const overlayCount = activeOverlays.length;
+
     setTimeout(() => {
       const response: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Analyzing ${activeSymbol} structural evolution. Observed divergence in ${replayMode.isActive ? 'historical' : 'realtime'} liquidity depth matches high-confidence analog clusters. Suggested forensic path: Review volatility precursors at T-5m.`,
-        context: `INTELLIGENCE_OS // ${activeSymbol} // ${replayMode.isActive ? 'REPLAY_RECONSTRUCTION' : 'LIVE_INGESTION'}`
+        content: `Forensic focus: ${activeSymbol}. Current regime identified as ${currentRegime}. Analyzing ${overlayCount} synchronized chart layers. Replay state aligns with structural escalation detected in previous analog clusters.`,
+        context: `INTELLIGENCE_OS // ${currentRegime} // ${replayMode.isActive ? 'REPLAY' : 'LIVE'}`
       };
       setMessages(prev => [...prev, response]);
-    }, 800);
+    }, 600);
   };
 
   return (

@@ -19,8 +19,15 @@ logger = logging.getLogger(__name__)
 async def main():
     event_bus = EventBus()
 
+    # Initialize shared persistence
+    from storage.batcher import DataBatcher
+    from storage.backends.sqlite import SQLiteRepository
+    repo = SQLiteRepository()
+    await repo.initialize()
+    batcher = DataBatcher(repo)
+
     # Register core platform components
-    registry.register("services", "ingestion", IngestionService)
+    registry.register("services", "ingestion", lambda eb: IngestionService(eb, batcher, ["980224"]))
     registry.register("services", "analytics", MicrostructureAnalyticsService)
     registry.register("services", "forecasting", ForecastService)
     registry.register("services", "signals", SignalService)

@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, ISeriesApi, SeriesMarker } from 'lightweight-charts';
+import React, { useEffect, useRef, useState } from 'react';
+import { createChart, ColorType, ISeriesApi, SeriesMarker, IChartApi } from 'lightweight-charts';
 import { useTerminalStore } from '../../state/terminalState';
 import { theme } from '../../theme';
+import { OverlayOrchestrator } from './OverlayOrchestrator';
 
 interface ChartProps {
   data?: any[];
@@ -10,7 +11,8 @@ interface ChartProps {
 export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
   const { marketData, marketContext } = useTerminalStore();
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
+  const [chartInstance, setChartInstance] = useState<IChartApi | null>(null);
+  const [mainSeries, setMainSeries] = useState<ISeriesApi<"Candlestick"> | null>(null);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -66,7 +68,8 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
       lineWidth: 2,
     });
 
-    seriesRef.current = candleSeries;
+    setChartInstance(chart);
+    setMainSeries(candleSeries);
 
     // Initial data load simulation
     const mockData = Array.from({ length: 100 }, (_, i) => ({
@@ -119,6 +122,10 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
   return (
     <div className="w-full h-full relative">
        <div ref={chartContainerRef} className="w-full h-full" />
+
+       {chartInstance && mainSeries && (
+          <OverlayOrchestrator chart={chartInstance} mainSeries={mainSeries} />
+       )}
        {/* High-frequency overlay labels */}
        <div className="absolute top-2 left-3 flex items-baseline gap-2 pointer-events-none">
           <span className="text-xl font-black font-mono text-slate-100 tracking-tighter">0.5421</span>

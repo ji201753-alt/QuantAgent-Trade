@@ -20,43 +20,48 @@ def register_routes(app: Flask, event_bus: EventBus):
     def websocket_bridge(ws):
         """
         Bridges the internal async EventBus to the threaded Flask WebSocket.
-        Handles reconnection and state synchronization for operational continuity.
+        Uses a thread-safe approach to communicate between the internal async
+        EventBus and the threaded Flask-Sock environment.
         """
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        import queue
+        from dataclasses import asdict, is_dataclass
+        bridge_queue = queue.Queue()
 
-        async def handle_events():
-            logger.info("Terminal WebSocket connection established")
+        def event_callback(event):
+            bridge_queue.put(event)
 
-            # Create a localized bridge queue
-            client_queue = asyncio.Queue()
+        # Register callbacks on the event bus
+        event_bus.subscribe(SignalEvent, event_callback)
+        event_bus.subscribe(TradeEvent, event_callback)
+        event_bus.subscribe(OrderBookSnapshot, event_callback)
 
-            # Define the callback to be registered with the EventBus
-            async def event_callback(event):
-                await client_queue.put(event)
+        # Initial State Sync
+        ws.send(json.dumps({
+            "type": "system_sync",
+            "status": "ready",
+            "version": "1.0.0"
+        }))
 
-            # Subscribe to all major event types to stream to the terminal
-            event_bus.subscribe(SignalEvent, event_callback)
-            event_bus.subscribe(TradeEvent, event_callback)
-            event_bus.subscribe(OrderBookSnapshot, event_callback)
+        while True:
+            try:
+                # Wait for next event from the bridge queue
+                event = bridge_queue.get(timeout=10)
 
-            # 1. Initial State Sync
-            ws.send(json.dumps({
-                "type": "system_sync",
-                "status": "ready",
-                "version": "1.0.0"
-            }))
+                # Proper JSON serialization for dataclasses
+                if is_dataclass(event):
+                    data = asdict(event)
+                    # Handle non-serializable types like datetime
+                    for k, v in data.items():
+                        if isinstance(v, datetime): data[k] = v.isoformat()
+                else:
+                    data = str(event)
 
-            while True:
-                try:
-                    # Wait for next event from the EventBus
-                    event = await client_queue.get()
-                    ws.send(json.dumps({
-                        "type": type(event).__name__,
-                        "data": str(event) # Simplified serialization
-                    }))
-                except Exception as e:
-                    logger.warning(f"WebSocket disconnected: {e}")
-                    break
-
-        loop.run_until_complete(handle_events())
+                ws.send(json.dumps({
+                    "type": type(event).__name__,
+                    "data": data
+                }))
+            except queue.Empty:
+                ws.send(json.dumps({"type": "heartbeat"}))
+            except Exception as e:
+                logger.warning(f"WebSocket disconnected: {e}")
+                break
