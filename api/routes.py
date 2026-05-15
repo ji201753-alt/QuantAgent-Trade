@@ -28,6 +28,18 @@ def register_routes(app: Flask, event_bus: EventBus):
         async def handle_events():
             logger.info("Terminal WebSocket connection established")
 
+            # Create a localized bridge queue
+            client_queue = asyncio.Queue()
+
+            # Define the callback to be registered with the EventBus
+            async def event_callback(event):
+                await client_queue.put(event)
+
+            # Subscribe to all major event types to stream to the terminal
+            event_bus.subscribe(SignalEvent, event_callback)
+            event_bus.subscribe(TradeEvent, event_callback)
+            event_bus.subscribe(OrderBookSnapshot, event_callback)
+
             # 1. Initial State Sync
             ws.send(json.dumps({
                 "type": "system_sync",
@@ -36,11 +48,13 @@ def register_routes(app: Flask, event_bus: EventBus):
             }))
 
             while True:
-                # In a real system, we'd subscribe to the EventBus here
-                # and forward all published events to the client.
-                await asyncio.sleep(1)
                 try:
-                    ws.send(json.dumps({"type": "heartbeat", "timestamp": str(datetime.now())}))
+                    # Wait for next event from the EventBus
+                    event = await client_queue.get()
+                    ws.send(json.dumps({
+                        "type": type(event).__name__,
+                        "data": str(event) # Simplified serialization
+                    }))
                 except Exception as e:
                     logger.warning(f"WebSocket disconnected: {e}")
                     break

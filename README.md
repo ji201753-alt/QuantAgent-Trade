@@ -1,47 +1,49 @@
-# Quant Intelligence Workstation (v1.1)
+# Quant Intelligence Workstation (v1.2)
 
-An immersive, professional-grade operational platform for quantitative market intelligence and forensic investigation. Designed for high-fidelity situational awareness, historical reconstruction, and cinematic ecosystem cognition.
+A fully inhabited operational intelligence ecosystem designed for real-time market cognition, forensic investigation, and ecosystem monitoring.
 
-## 🚀 Immersive Operational Engine
+## 🚀 Unified Operational Surface
 
-The workstation transforms complex market microstructure into a unified operational surface.
+The workstation transforms complex market microstructure into a cohesive, interactive environment where intelligence flows naturally across layers.
 
-- **Unified Intelligence Surface**: The charting environment is the central surface where forecasting, structural pressure, and contextual reasoning visually converge.
-- **Layered Intelligence**:
-    - **Structural Zones**: Visualizes liquidity concentration and volatility expansion boundaries.
-    - **Probabilistic Trajectories**: Dynamic multi-horizon forecast rendering with uncertainty shading.
-    - **Kronos Cognitive Markers**: Direct on-chart visualization of historical structural analogs and regime transitions.
-- **Cinematic Experience**: Reactive environmental lighting, layered glass aesthetics, and subconscious visual feedback for structural instability.
-- **Grounded Reasoning & Forensic Drill-Down**: Interactive briefings with direct links to chart event markers and evidence chains.
+- **Unified Intelligence Surface**: The central charting environment where forecasting, structural pressure, and contextual reasoning converge through high-density overlays.
+- **Operational Copilot**: An integrated realtime reasoning assistant tightly grounded in current platform state, replay chronology, and forensic evidence.
+- **Structural Similarity Surface**: High-speed discovery and visualization of historical analogs for current market conditions.
+- **Ecosystem Intelligence**: Systemic tracking of contagion propagation, liquidity migration, and cross-domain pressure.
+- **Forensic Investigation Core**: Multi-threaded case management with parent/child branching, evidence-chain building, and publication-quality exports.
 
-## 🧠 Model Orchestration (TimesFM & Kronos)
+## 🧠 Intelligence Orchestration
 
-The workstation supports professional local-first model execution:
+The platform orchestrates advanced quantitative models locally for complete analytical continuity:
 
-### TimesFM Setup
-1. **Model Weights**: Place model checkpoints in `checkpoints/timesfm-1.0-200m/`.
-2. **Inference Acceleration**: The system automatically detects CUDA-capable GPUs with automatic fallback to CPU.
-3. **Runtime Activation**: Enable via `config/settings.yaml` under `forecasting.timesfm.enabled: true`.
-4. **Diagnostics**: Real-time monitoring of inference latency and model status in the Observability Panel.
-
-### Kronos Structural Cognition
-- **Fingerprinting**: Local-first generation of multi-factor structural embeddings.
-- **Analogs**: Real-time indexing of historical structural fingerprints for high-speed similarity search.
+- **TimesFM (Forecasting)**: Probabilistic multi-horizon inference with local weight support and automatic GPU/CPU fallback.
+- **Kronos (Cognition)**: Structural fingerprinting and high-speed similarity indexing for forensic structural search.
+- **Unified Chronology**: A persistent, synchronized timeline of all internal signals and external catalysts across the ecosystem.
 
 ## 🛠 Platform Architecture
 
-- `/core`: Registry-based service orchestration and health monitoring.
-- `/connectors`: Resilient market adapters (Polymarket CLOB, Crypto).
+- `/core`: Extensible registry-based orchestration and operational health monitoring.
+- `/connectors`: Resilient adapters for crypto, prediction markets, and macro calendars.
 - `/analytics`: Quantitative engines for real-time microstructure synthesis.
-- `/forecasting`: TimesFM integration and probabilistic inference orchestration.
-- `/investigations`: Forensic case management and analytical reporting.
-- `/frontend`: High-fidelity cinematic terminal (Unified Operational Surface).
+- `/forecasting`: TimesFM inference orchestration and trajectory generation.
+- `/memory`: Structural fingerprinting, similarity indexing, and analog discovery.
+- `/macro`: Systemic contagion tracking and cross-market correlation.
+- `/investigations`: Forensic case management, evidence archival, and reporting.
+- `/reasoning`: Grounded briefings and the interactive Operational Copilot.
+- `/frontend`: Cinematic terminal workstation (v1.2 Inhabited Ecosystem).
+
+## 🛡 Operational Philosophy
+
+- **Local-First**: All data, memory, and models are executed and persisted locally. Zero cloud dependency.
+- **Durable Continuity**: Robust reconnection logic and session-aware state hydration for long-duration operation.
+- **Probabilistic & Grounded**: AI components are restricted to evidence-based synthesis—no autonomous trading or predictive hallucinations.
 
 ## ⚙️ Quick Start
 
 1. **Initialize**: Run `./install.sh`.
-2. **Launch Engine**: `python -m core.engine`.
-3. **Launch Terminal**: `cd frontend && npm run dev`.
+2. **Configure**: Edit `config/settings.yaml` (Enable TimesFM/Kronos).
+3. **Launch Engine**: `python -m core.engine`.
+4. **Launch Terminal**: `cd frontend && npm run dev`.
 
 ---
-*v1.1 — The Unified Operational Intelligence Surface.*
+*v1.2 — The Inhabited Operational Intelligence Ecosystem.*

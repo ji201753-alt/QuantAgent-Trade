@@ -16,6 +16,7 @@ import { MacroPanel } from './components/panels/MacroPanel';
 import { MacroEcosystemPanel } from './components/panels/MacroEcosystemPanel';
 import { DecisionPanel } from './components/panels/DecisionPanel';
 import { ReasoningPanel } from './components/panels/ReasoningPanel';
+import { OperationalCopilot } from './components/copilot/CopilotPanel';
 import { InvestigationPanel } from './components/panels/InvestigationPanel';
 import { HighFrequencyChart } from './components/charts/HighFrequencyChart';
 import { FactorExplorer } from './components/research/FactorExplorer';
@@ -188,7 +189,7 @@ const App: React.FC = () => {
                 <div className="flex-1 overflow-hidden shadow-lg"><DecisionPanel /></div>
              </div>
              <div className="col-span-4 flex flex-col gap-1 overflow-hidden">
-                <div className="flex-[3] overflow-hidden shadow-lg"><ReasoningPanel /></div>
+                <div className="flex-[3] overflow-hidden shadow-lg"><OperationalCopilot /></div>
                 <div className="flex-[2] overflow-hidden shadow-lg"><AlertTimeline /></div>
              </div>
              <div className="col-span-4 flex flex-col gap-1 overflow-hidden">

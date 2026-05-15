@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CinematicPanel } from '../layout/CinematicPanel';
 import { theme } from '../../theme';
 import { Columns, History, Target, ArrowRight } from 'lucide-react';
+import { SimilaritySurface } from './SimilaritySurface';
 
 export const ComparisonWorkbench: React.FC = () => {
   const [activeWindows, setActiveWindows] = useState([
@@ -23,7 +24,8 @@ export const ComparisonWorkbench: React.FC = () => {
          </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-2 gap-1 overflow-hidden">
+      <div className="flex-1 grid grid-cols-12 gap-1 overflow-hidden">
+        <div className="col-span-8 grid grid-cols-2 gap-1 overflow-hidden">
         {activeWindows.map(win => (
           <div key={win.id} className="flex flex-col gap-1 overflow-hidden">
             <CinematicPanel
@@ -82,6 +84,10 @@ export const ComparisonWorkbench: React.FC = () => {
             </div>
           </div>
         ))}
+        </div>
+        <div className="col-span-4 overflow-hidden">
+           <SimilaritySurface />
+        </div>
       </div>
 
       {/* Comparison Summary Bar */}

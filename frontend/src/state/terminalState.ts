@@ -203,6 +203,17 @@ export const useTerminalStore = create<TerminalState>((set) => ({
   hoveredSignalId: null,
   setHoveredSignal: (id) => set({ hoveredSignalId: id }),
 
+  // Full Session Persistence
+  persistSession: () => {
+    const state = (get() as any);
+    const payload = {
+        activeSymbol: state.activeSymbol,
+        activeWorkspaceId: state.activeWorkspaceId,
+        replayMode: state.replayMode,
+    };
+    localStorage.setItem('quant_session_v1', JSON.stringify(payload));
+  },
+
   contextSnapshots: [],
   captureSnapshot: () => set((state) => ({
     contextSnapshots: [{

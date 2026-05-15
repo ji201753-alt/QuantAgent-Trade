@@ -93,12 +93,39 @@ class SQLiteRepository(DataRepository):
         await self._db.commit()
 
     async def get_ohlcv(self, symbol: str, limit: int) -> List[OHLCV]:
-        return []
+        async with self._db.execute(
+            "SELECT * FROM ohlcv WHERE symbol = ? ORDER BY timestamp DESC LIMIT ?",
+            (symbol, limit)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [OHLCV(
+                symbol=r[0],
+                timestamp=datetime.fromisoformat(r[1]),
+                open=r[2], high=r[3], low=r[4], close=r[5], volume=r[6],
+                interval="1m"
+            ) for r in rows]
 
     async def get_trades(self, symbol: str, start: datetime, end: datetime) -> List[TradeEvent]:
-        # Implementation for historical trade retrieval
-        return []
+        async with self._db.execute(
+            "SELECT * FROM trades WHERE symbol = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp",
+            (symbol, start.isoformat(), end.isoformat())
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [TradeEvent(
+                symbol=r[0],
+                timestamp=datetime.fromisoformat(r[1]),
+                price=r[2], amount=r[3], side=r[4]
+            ) for r in rows]
 
     async def get_orderbooks(self, symbol: str, start: datetime, end: datetime) -> List[OrderBookSnapshot]:
-        # Implementation for historical orderbook retrieval
-        return []
+        async with self._db.execute(
+            "SELECT * FROM orderbooks WHERE symbol = ? AND timestamp BETWEEN ? AND ? ORDER BY timestamp",
+            (symbol, start.isoformat(), end.isoformat())
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [OrderBookSnapshot(
+                symbol=r[0],
+                timestamp=datetime.fromisoformat(r[1]),
+                bids=[], # Simplified for model compatibility
+                asks=[]
+            ) for r in rows]

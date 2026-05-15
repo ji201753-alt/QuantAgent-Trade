@@ -16,6 +16,11 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
+      crosshair: {
+        mode: 0,
+        vertLine: { color: theme.colors.semantic.confidence, labelBackgroundColor: theme.colors.semantic.confidence },
+        horzLine: { color: theme.colors.semantic.confidence, labelBackgroundColor: theme.colors.semantic.confidence },
+      },
       handleScroll: true,
       handleScale: true,
       layout: {
@@ -91,6 +96,13 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
       }
     ];
     candleSeries.setMarkers(markers);
+
+    chart.subscribeClick((param) => {
+      if (param.time) {
+        console.log(`Chart click at ${param.time}`);
+        // Synchronize context focus or investigation bookmark
+      }
+    });
 
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
