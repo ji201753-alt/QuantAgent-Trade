@@ -1,53 +1,55 @@
-# Quant Intelligence Workstation (v1.0)
+# Quant Intelligence Workstation (v1.0-RC1)
 
-A durable, extensible, and institutional-grade operational platform for quantitative market intelligence and forensic investigation.
+A professional, local-first operational platform for quantitative market intelligence and forensic investigation. Designed for high-fidelity situational awareness, historical reconstruction, and ecosystem cognition.
 
-## 🚀 Overview
+## 🚀 Key Features
 
-The workstation is a production-grade environment designed for high-fidelity market intelligence. It transforms raw ingestion into contextual cognition through a modular quantitative core, providing operators with immersive situational awareness and publication-quality forensic investigation tools.
+- **Institutional Microstructure Core**: Real-time engines for orderbook imbalance, liquidity concentration, and structural volatility.
+- **Forensic Investigation System**: Multi-threaded case management with evidence-chain building and publication-quality exports.
+- **Unified Market Chronology**: A persistent timeline correlating internal signals with external macro catalysts.
+- **Deterministic Historical Replay**: Cinematic reconstruction of market states with full synchronization across analytical layers.
+- **Ecosystem Cognition**: Systemic tracking of cross-domain pressure, structural contagion, and liquidity migration.
+- **Grounded Investigation Copilot**: AI-assisted briefings strictly grounded in quantified system intelligence.
 
-### Core Platform Architecture
-- **Extensible Registry**: Modular component discovery for connectors, analytics, and reasoning engines.
-- **Ecosystem Ingestion**: Resilient connectors for crypto, prediction markets, and macro catalysts.
-- **Unified Chronology**: Persistent, searchable timeline of all operational events and external catalysts.
-- **Forensic Investigation**: Professional case management with branching analysis trees and publication-quality exports.
-- **Comparative Intelligence**: High-speed structural search and side-by-side analog comparison.
-- **Institutional UX**: Cinematic terminal environment with workspace composition and layout presets.
+## 🛠 Platform Architecture
 
-## 🛠 Platform Extension Model
+The system is built on a modular, async-first quantitative core:
+- `/core`: Registry-based service orchestration and high-throughput EventBus.
+- `/connectors`: Resilient market adapters (Polymarket CLOB, Crypto).
+- `/analytics`: Quantitative engines for real-time microstructure synthesis.
+- `/forecasting`: Probabilistic inference and ensemble models (TimesFM).
+- `/investigations`: Forensic case management and local archival.
+- `/storage`: Async-safe batched persistence (SQLite/Parquet).
+- `/frontend`: High-fidelity cinematic terminal workstation.
 
-The platform is designed for modular evolution via the `ComponentRegistry`:
-- **Connectors**: Add new market domains using normalized schemas.
-- **Analytics**: Register custom microstructure or statistical engines.
-- **Reasoning**: Attach specialized investigative assistants grounded in system intelligence.
+## ⚙️ Operational Setup
 
-## 🖥 Operational Workflows
+### Prerequisites
+- **Python 3.12+**
+- **Node.js v22+**
+- **TA-Lib** (Technical Analysis Library)
 
-- **Forensic Analysis**: Conduct multi-threaded investigations using parent/child case branching and integrated replay.
-- **Ecosystem Monitoring**: Track systemic contagion and liquidity migration across correlated market domains.
-- **Historical Search**: Discover historical structural analogs using contextual fingerprinting and similarity indexing.
-- **Publication Reporting**: Export professional-grade analytical reports with structured evidence chains and grounded narratives.
+### Quick Start
+1. **Clone & Initialize**: Run `./install.sh` to set up dependencies and local storage.
+2. **Configure**: Edit `config/settings.yaml` to enable connectors or adjust paths.
+3. **Launch Engine**: `python -m core.engine`
+4. **Launch Terminal**: `cd frontend && npm run dev`
 
 ## 🛡 Operational Philosophy
 
-- **Local-First**: All data, memory, and models are executed locally. Zero mandatory cloud dependency.
-- **Durable Continuity**: Automatic recovery from interruptions and session-aware state hydration.
-- **Probabilistic & Grounded**: AI components are restricted to evidence-based synthesis—no autonomous trading or predictive hallucinations.
+- **Local-First**: All data, intelligence, and memory are executed and persisted locally. Zero cloud dependency by default.
+- **Durable Continuity**: Robust reconnection logic and session-aware state hydration for long-duration operation.
+- **Probabilistic**: Focus on uncertainty and structural pressure to support human decision-making.
+- **Grounded**: AI components are restricted to evidence-based synthesis—no autonomous trading.
 
-## ⚙️ Getting Started
-
-### Prerequisites
-- Python 3.12+
-- Node.js v22+
-- TA-Lib
-
-### Installation
-1. `pip install -r requirements.txt`
-2. `cd frontend && npm install`
-
-### Execution
-1. Start Core: `python -m core.engine`
-2. Start Terminal: `cd frontend && npm run dev`
+## 📁 Repository Structure
+- `api/`: WebSocket bridge and lightweight REST endpoints.
+- `common/`: Universal normalized market and intelligence schemas.
+- `config/`: Professional configuration management.
+- `docs/`: (Planned) Detailed extension and troubleshooting guides.
+- `macro/`: Ecosystem-level catalyst and correlation services.
+- `meta/`: Structural taxonomy and pattern evolution tracking.
+- `reasoning/`: Grounded briefings and exploration co-pilot.
 
 ---
-*v1.0 — Institutional Market Intelligence Platform.*
+*v1.0 Release Candidate — Institutional Market Intelligence Platform.*

@@ -19,10 +19,11 @@ class ComponentRegistry:
         }
 
     def register(self, category: str, name: str, component_class: Type):
+        """Registers a new component class to the registry."""
         if category not in self._categories:
             self._categories[category] = {}
         self._categories[category][name] = component_class
-        logger.debug(f"Registered {category}/{name}")
+        logger.info(f"Registry: Registered {category}/{name}")
 
     def get(self, category: str, name: str) -> Type:
         return self._categories.get(category, {}).get(name)

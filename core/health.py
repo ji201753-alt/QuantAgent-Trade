@@ -40,5 +40,10 @@ class HealthMonitor:
         return {
             "uptime": time.time() - self.start_time,
             "services": {k: v.__dict__ for k, v in self.services.items()},
-            "throughput": self.msg_count / max(1, (time.time() - self.start_time))
+            "throughput": self.msg_count / max(1, (time.time() - self.start_time)),
+            "diagnostics": {
+                "storage_pressure": 0.12, # Mock
+                "event_bus_backlog": self.event_bus.queue.qsize(),
+                "active_websockets": 1
+            }
         }
