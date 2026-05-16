@@ -14,6 +14,11 @@ class EventBus:
         self.subscribers[event_type].append(callback)
         logger.debug(f"Subscribed to {event_type.__name__}")
 
+    def unsubscribe(self, event_type: Type, callback: Callable):
+        if callback in self.subscribers[event_type]:
+            self.subscribers[event_type].remove(callback)
+            logger.debug(f"Unsubscribed from {event_type.__name__}")
+
     async def publish(self, event: Any):
         await self.queue.put(event)
 

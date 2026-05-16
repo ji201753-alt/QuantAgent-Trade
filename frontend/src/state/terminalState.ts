@@ -138,6 +138,10 @@ interface TerminalState {
   // Command & Navigation State
   isCommandPaletteOpen: boolean;
   setCommandPalette: (open: boolean) => void;
+
+  // Adaptive Workspace State
+  operationalStressLevel: number; // 0.0 to 1.0
+  setOperationalStress: (level: number) => void;
 }
 
 export const useTerminalStore = create<TerminalState>((set) => ({
@@ -246,4 +250,7 @@ export const useTerminalStore = create<TerminalState>((set) => ({
 
   isCommandPaletteOpen: false,
   setCommandPalette: (open) => set({ isCommandPaletteOpen: open }),
+
+  operationalStressLevel: 0.1,
+  setOperationalStress: (level) => set({ operationalStressLevel: level }),
 }));

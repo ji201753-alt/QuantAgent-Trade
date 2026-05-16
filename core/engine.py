@@ -5,7 +5,7 @@ from core.registry import registry
 from core.ingestion_service import IngestionService
 from analytics.services.microstructure_service import MicrostructureAnalyticsService
 from forecasting.services.forecast_service import ForecastService
-from signals.services.signal_service import SignalIntelligenceService
+from signals.services.signal_service import SignalService
 from decision.services.decision_service import DecisionCognitionService
 from meta.services.meta_service import MetaIntelligenceService
 from macro.services.macro_service import MacroIntelligenceService
@@ -28,9 +28,9 @@ async def main():
 
     # Register core platform components
     registry.register("services", "ingestion", lambda eb: IngestionService(eb, batcher, ["980224"]))
-    registry.register("services", "analytics", lambda eb: MicrostructureAnalyticsService(eb, repo))
+    registry.register("services", "analytics", MicrostructureAnalyticsService)
     registry.register("services", "forecasting", ForecastService)
-    registry.register("services", "signals", SignalIntelligenceService)
+    registry.register("services", "signals", SignalService)
     registry.register("services", "decision", DecisionCognitionService)
     registry.register("services", "meta", MetaIntelligenceService)
     registry.register("services", "macro", MacroIntelligenceService)

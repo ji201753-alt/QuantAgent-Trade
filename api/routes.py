@@ -35,33 +35,40 @@ def register_routes(app: Flask, event_bus: EventBus):
         event_bus.subscribe(TradeEvent, event_callback)
         event_bus.subscribe(OrderBookSnapshot, event_callback)
 
-        # Initial State Sync
-        ws.send(json.dumps({
-            "type": "system_sync",
-            "status": "ready",
-            "version": "1.0.0"
-        }))
+        try:
+            # Initial State Sync
+            ws.send(json.dumps({
+                "type": "system_sync",
+                "status": "ready",
+                "version": "1.0.0"
+            }))
 
-        while True:
-            try:
-                # Wait for next event from the bridge queue
-                event = bridge_queue.get(timeout=10)
+            while True:
+                try:
+                    # Wait for next event from the bridge queue
+                    event = bridge_queue.get(timeout=10)
 
-                # Proper JSON serialization for dataclasses
-                if is_dataclass(event):
-                    data = asdict(event)
-                    # Handle non-serializable types like datetime
-                    for k, v in data.items():
-                        if isinstance(v, datetime): data[k] = v.isoformat()
-                else:
-                    data = str(event)
+                    # Proper JSON serialization for dataclasses
+                    if is_dataclass(event):
+                        data = asdict(event)
+                        # Handle non-serializable types like datetime
+                        for k, v in data.items():
+                            if isinstance(v, datetime): data[k] = v.isoformat()
+                    else:
+                        data = str(event)
 
-                ws.send(json.dumps({
-                    "type": type(event).__name__,
-                    "data": data
-                }))
-            except queue.Empty:
-                ws.send(json.dumps({"type": "heartbeat"}))
-            except Exception as e:
-                logger.warning(f"WebSocket disconnected: {e}")
-                break
+                    ws.send(json.dumps({
+                        "type": type(event).__name__,
+                        "data": data
+                    }))
+                except queue.Empty:
+                    ws.send(json.dumps({"type": "heartbeat"}))
+                except Exception as e:
+                    logger.warning(f"WebSocket internal error: {e}")
+                    break
+        finally:
+            # Prevent memory leak: Unregister callbacks on disconnect
+            event_bus.unsubscribe(SignalEvent, event_callback)
+            event_bus.unsubscribe(TradeEvent, event_callback)
+            event_bus.unsubscribe(OrderBookSnapshot, event_callback)
+            logger.info("Terminal WebSocket connection closed and unsubscribed")
