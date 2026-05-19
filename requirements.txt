@@ -5,10 +5,7 @@ websockets
 flask
 flask-sock
 ta-lib
-framer-motion
-zustand
-lucide-react
-lightweight-charts
 pytest
 pytest-asyncio
 playwright
+pyyaml

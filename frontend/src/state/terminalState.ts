@@ -38,6 +38,7 @@ export interface HistoricalAnalog {
   temporal_distance_days: number;
   description: string;
   recurrence_probability: number;
+  trajectory?: any[];
 }
 
 export interface MacroRegime {
@@ -65,6 +66,16 @@ export interface DecisionIntelligence {
         is_collapsing: boolean;
     };
     operational_pressure: number;
+}
+
+export interface InvestigationSession {
+  id: string;
+  title: string;
+  replayTime: string | null;
+  activeOverlays: string[];
+  pinnedEvidence: string[];
+  reasoningHistory: any[];
+  workspaceId: string;
 }
 
 interface TerminalState {
@@ -120,12 +131,15 @@ interface TerminalState {
   hoveredSignalId: string | null;
   setHoveredSignal: (id: string | null) => void;
 
+  // Full Session Persistence
+  persistSession: () => void;
+
   contextSnapshots: any[];
   captureSnapshot: () => void;
 
   // Contextual Ripple System
   contextualFocus: {
-    type: 'price' | 'signal' | 'anomaly' | 'event' | null;
+    type: 'price' | 'signal' | 'anomaly' | 'event' | 'forecast' | null;
     id: string | number | null;
     metadata: any;
   };
@@ -142,9 +156,30 @@ interface TerminalState {
   // Adaptive Workspace State
   operationalStressLevel: number; // 0.0 to 1.0
   setOperationalStress: (level: number) => void;
+
+  // Multi-Domain Connectors
+  connectors: Record<string, { enabled: boolean, status: string, latency: number }>;
+  toggleConnector: (id: string) => void;
+
+  // Kronos Structural Cognition State
+  kronos: {
+    activeAnalogs: HistoricalAnalog[];
+    similarityThreshold: number;
+    analogDepth: number;
+    projectionDistance: number;
+    structuralAlignment: number; // 0 to 1
+    divergencePoints: Array<{ timestamp: string, severity: number }>;
+  };
+  setKronosSettings: (settings: Partial<TerminalState['kronos']>) => void;
+  setActiveAnalogs: (analogs: HistoricalAnalog[]) => void;
+
+  // Forensic Investigation Continuity
+  activeInvestigation: InvestigationSession | null;
+  setInvestigation: (inv: InvestigationSession | null) => void;
+  saveInvestigation: () => void;
 }
 
-export const useTerminalStore = create<TerminalState>((set) => ({
+export const useTerminalStore = create<TerminalState>((set, get) => ({
   isConnected: false,
   setConnected: (status) => set({ isConnected: status }),
   activeSymbol: "BTC",
@@ -175,8 +210,8 @@ export const useTerminalStore = create<TerminalState>((set) => ({
   decisionIntelligence: null,
   setDecisionIntelligence: (decision) => set({ decisionIntelligence: decision }),
 
-  workspaces: [{ id: 'default', name: 'Realtime Monitor' }],
-  activeWorkspaceId: 'default',
+  workspaces: [{ id: 'prediction', name: 'Prediction Markets' }],
+  activeWorkspaceId: 'prediction',
   setWorkspace: (id) => set({ activeWorkspaceId: id }),
 
   stats: { latency: 0, throughput: 0, droppedEvents: 0 },
@@ -215,13 +250,14 @@ export const useTerminalStore = create<TerminalState>((set) => ({
   hoveredSignalId: null,
   setHoveredSignal: (id) => set({ hoveredSignalId: id }),
 
-  // Full Session Persistence
   persistSession: () => {
     const state = (get() as any);
     const payload = {
         activeSymbol: state.activeSymbol,
         activeWorkspaceId: state.activeWorkspaceId,
         replayMode: state.replayMode,
+        activeOverlays: state.activeOverlays,
+        activeInvestigation: state.activeInvestigation
     };
     localStorage.setItem('quant_session_v1', JSON.stringify(payload));
   },
@@ -253,4 +289,42 @@ export const useTerminalStore = create<TerminalState>((set) => ({
 
   operationalStressLevel: 0.1,
   setOperationalStress: (level) => set({ operationalStressLevel: level }),
+
+  connectors: {
+    polymarket: { enabled: true, status: 'CONNECTED', latency: 42 },
+    binance: { enabled: true, status: 'CONNECTED', latency: 12 },
+    bybit: { enabled: false, status: 'IDLE', latency: 0 },
+    okx: { enabled: true, status: 'CONNECTED', latency: 18 }
+  },
+  toggleConnector: (id) => set((state) => ({
+    connectors: {
+      ...state.connectors,
+      [id]: { ...state.connectors[id], enabled: !state.connectors[id].enabled }
+    }
+  })),
+
+  kronos: {
+    activeAnalogs: [],
+    similarityThreshold: 0.85,
+    analogDepth: 5,
+    projectionDistance: 128,
+    structuralAlignment: 1.0,
+    divergencePoints: []
+  },
+  setKronosSettings: (update) => set((state) => ({
+    kronos: { ...state.kronos, ...update }
+  })),
+  setActiveAnalogs: (analogs) => set((state) => ({
+    kronos: { ...state.kronos, activeAnalogs: analogs }
+  })),
+
+  activeInvestigation: null,
+  setInvestigation: (inv) => set({ activeInvestigation: inv }),
+  saveInvestigation: () => {
+    const inv = get().activeInvestigation;
+    if (inv) {
+        const history = JSON.parse(localStorage.getItem('quant_investigations') || '[]');
+        localStorage.setItem('quant_investigations', JSON.stringify([inv, ...history.filter((h: any) => h.id !== inv.id)]));
+    }
+  }
 }));
