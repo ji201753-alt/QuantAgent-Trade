@@ -80,6 +80,71 @@ class MarketPressure:
     buy_pressure: float
     sell_pressure: float
 
+
+@dataclass
+class VolumeAtPriceLevel:
+    price: float
+    bid_volume: float = 0.0
+    ask_volume: float = 0.0
+    total_volume: float = 0.0
+    delta: float = 0.0
+    imbalance_ratio: float = 0.0
+    classification: str = "NEUTRAL"
+
+@dataclass
+class OrderFlowDelta:
+    symbol: str
+    timestamp: datetime
+    buy_volume: float
+    sell_volume: float
+    delta: float
+    cumulative_delta: float
+    trade_count: int
+    data_mode: str = "LIMITED_DATA_MODE"
+    aggressive_buy_volume: float = 0.0
+    aggressive_sell_volume: float = 0.0
+    stacked_imbalance_count: int = 0
+
+@dataclass
+class MicrostructureFrame:
+    symbol: str
+    timestamp: datetime
+    bid_depth_total: float
+    ask_depth_total: float
+    depth_imbalance: float
+    spread: float
+    mid_price: float
+    order_flow: OrderFlowDelta
+    volume_profile: List[VolumeAtPriceLevel] = field(default_factory=list)
+    data_mode: str = "LIMITED_DATA_MODE"
+    replay_anchor: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class MicrostructureSignal:
+    symbol: str
+    timestamp: datetime
+    signal_type: str
+    severity: str
+    value: float
+    threshold: float
+    description: str
+    frame_anchor: str
+    data_mode: str = "LIMITED_DATA_MODE"
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class NormalizedExternalEvent:
+    id: str
+    timestamp: datetime
+    category: str
+    title: str
+    summary: str
+    severity: str = "info"
+    source: str = "manual"
+    affected_symbols: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
 @dataclass
 class AnomalyEvent:
     symbol: str

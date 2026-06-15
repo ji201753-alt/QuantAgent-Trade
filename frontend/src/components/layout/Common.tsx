@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { theme } from '../theme';
+import { theme } from '../../theme';
 
 interface GlowContainerProps {
   children: React.ReactNode;

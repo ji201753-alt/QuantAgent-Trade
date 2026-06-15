@@ -65,11 +65,6 @@ class StartupOrchestrator:
 
             self.instances = registry.instantiate_all("services", self.event_bus)
 
-            # Start Background Services
-            for inst in self.instances:
-                if hasattr(inst, 'start'):
-                    asyncio.create_task(inst.start())
-
             self.state = SystemState.SERVICES_INITIALIZED
             await self.event_bus.publish({"type": "LIFECYCLE", "state": self.state.name})
 

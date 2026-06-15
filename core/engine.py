@@ -1,62 +1,97 @@
 import asyncio
 import logging
-from core.event_bus import EventBus
-from core.registry import registry
-from core.ingestion_service import IngestionService
-from analytics.services.microstructure_service import MicrostructureAnalyticsService
-from forecasting.services.forecast_service import ForecastService
-from signals.services.signal_service import SignalService
-from decision.services.decision_service import DecisionCognitionService
-from meta.services.meta_service import MetaIntelligenceService
-from macro.services.macro_service import MacroIntelligenceService
-from core.chronology import UnifiedChronologyService
-from investigations.cases.manager import InvestigationManager
-from api.app import create_app
+import threading
+from typing import List, Optional
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+from api.app import create_app
+from core.event_bus import EventBus
+from core.orchestration import StartupOrchestrator
+from core.runtime_orchestrator import ModelRuntimeOrchestrator
+
 logger = logging.getLogger(__name__)
 
+
+class MarketIntelligenceEngine:
+    """
+    Single runtime authority for workstation lifecycle.
+
+    Consolidates startup orchestration, runtime model orchestration,
+    websocket/API serving, and graceful shutdown into one deterministic path.
+    """
+    def __init__(self, connectors: Optional[List[object]] = None, orchestrator=None, repository=None):
+        self.connectors = connectors or []
+        self._external_orchestrator = orchestrator
+        self._external_repository = repository
+
+        self.event_bus = EventBus()
+        self.startup = StartupOrchestrator(self.event_bus)
+        self.runtime_orchestrator = ModelRuntimeOrchestrator(self.event_bus)
+
+        self._api_thread: Optional[threading.Thread] = None
+        self._service_tasks: List[asyncio.Task] = []
+        self.is_running = False
+
+    async def start(self):
+        if self.is_running:
+            return
+
+        await self.startup.orchestrate()
+
+        # EventBus dispatcher is the core runtime loop authority.
+        self._service_tasks.append(asyncio.create_task(self.event_bus.start()))
+
+        # Ensure model runtime telemetry/lifecycle authority is active.
+        self._service_tasks.append(asyncio.create_task(self.runtime_orchestrator.start()))
+
+        # Start all startup-instantiated services
+        for instance in self.startup.get_instances():
+            if hasattr(instance, "start"):
+                self._service_tasks.append(asyncio.create_task(instance.start()))
+
+        app = create_app(self.event_bus, self.runtime_orchestrator)
+        self._api_thread = threading.Thread(
+            target=lambda: app.run(host="0.0.0.0", port=5000, debug=False, use_reloader=False),
+            daemon=True,
+        )
+        self._api_thread.start()
+
+        self.is_running = True
+        logger.info("MarketIntelligenceEngine started")
+
+    async def stop(self):
+        if not self.is_running:
+            return
+
+        for instance in self.startup.get_instances():
+            if hasattr(instance, "stop"):
+                try:
+                    await instance.stop()
+                except Exception:
+                    logger.exception("Service stop failure during shutdown")
+
+        await self.event_bus.stop()
+
+        for task in self._service_tasks:
+            if not task.done():
+                task.cancel()
+        if self._service_tasks:
+            await asyncio.gather(*self._service_tasks, return_exceptions=True)
+
+        self._service_tasks.clear()
+        self.is_running = False
+        logger.info("MarketIntelligenceEngine stopped")
+
+
 async def main():
-    event_bus = EventBus()
+    engine = MarketIntelligenceEngine()
+    await engine.start()
+    # Keep main alive while background tasks run.
+    while True:
+        await asyncio.sleep(1)
 
-    # Initialize shared persistence
-    from storage.batcher import DataBatcher
-    from storage.backends.sqlite import SQLiteRepository
-    repo = SQLiteRepository()
-    await repo.initialize()
-    batcher = DataBatcher(repo)
-
-    # Register core platform components
-    registry.register("services", "ingestion", lambda eb: IngestionService(eb, batcher, ["980224"]))
-    registry.register("services", "analytics", MicrostructureAnalyticsService)
-    registry.register("services", "forecasting", ForecastService)
-    registry.register("services", "signals", SignalService)
-    registry.register("services", "decision", DecisionCognitionService)
-    registry.register("services", "meta", MetaIntelligenceService)
-    registry.register("services", "macro", MacroIntelligenceService)
-    registry.register("services", "chronology", UnifiedChronologyService)
-
-    # Instantiate via Registry for platform extensibility
-    instances = registry.instantiate_all("services", event_bus)
-    investigations = InvestigationManager()
-
-    # Start Services
-    services = [event_bus.start()] + [inst.start() for inst in instances if hasattr(inst, 'start')]
-
-    # Start API/WebSocket Server
-    app = create_app(event_bus)
-
-    logger.info("Starting Quant Intelligence Core...")
-
-    # Run Flask in a separate thread to not block the event loop
-    import threading
-    api_thread = threading.Thread(target=lambda: app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False))
-    api_thread.daemon = True
-    api_thread.start()
-
-    await asyncio.gather(*services)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

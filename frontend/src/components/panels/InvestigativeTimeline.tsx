@@ -17,7 +17,24 @@ interface OperationalSequence {
 }
 
 export const InvestigativeTimeline: React.FC = () => {
-  const { replayMode } = useTerminalStore();
+  const { replayMode, setReplayMode, setInvestigation, activeOverlays, activeWorkspaceId } = useTerminalStore();
+  const anchorReplay = (timestamp: string) => {
+    const [hours, minutes, seconds] = timestamp.split(':').map(Number);
+    const anchor = new Date();
+    anchor.setUTCHours(hours || 0, minutes || 0, seconds || 0, 0);
+    setReplayMode(true, anchor.toISOString());
+  };
+  const synthesizeInvestigation = () => {
+    setInvestigation({
+      id: `INV-${Date.now()}`,
+      title: 'Synthesized chronology investigation',
+      replayTime: replayMode.currentTime,
+      activeOverlays,
+      pinnedEvidence: sequences.flatMap(seq => seq.events.map(event => `${event.timestamp}:${event.summary}`)),
+      reasoningHistory: [],
+      workspaceId: activeWorkspaceId,
+    });
+  };
 
   const sequences: OperationalSequence[] = useMemo(() => [
     {
@@ -70,7 +87,7 @@ export const InvestigativeTimeline: React.FC = () => {
 
                <div className="space-y-4 pl-4 border-l border-slate-800">
                   {seq.events.map(event => (
-                     <div key={event.id} className="relative group cursor-pointer hover:bg-white/5 p-2 rounded-sm transition-all">
+                     <div key={event.id} onClick={() => anchorReplay(event.timestamp)} className="relative group cursor-pointer hover:bg-white/5 p-2 rounded-sm transition-all">
                         <div className="flex justify-between items-baseline mb-1">
                            <span className="text-[9px] font-bold text-slate-500 group-hover:text-indigo-400">{event.timestamp}</span>
                            <span className="text-[7px] font-black uppercase text-slate-700">{event.type}</span>
@@ -84,7 +101,7 @@ export const InvestigativeTimeline: React.FC = () => {
       </div>
 
       <footer className="p-4 bg-black/40 border-t border-white/5">
-         <button className="w-full bg-indigo-600 text-white py-2 rounded-sm font-black uppercase text-[9px] tracking-widest hover:bg-indigo-500 transition-all shadow-xl">
+         <button onClick={synthesizeInvestigation} className="w-full bg-indigo-600 text-white py-2 rounded-sm font-black uppercase text-[9px] tracking-widest hover:bg-indigo-500 transition-all shadow-xl">
             Synthesize_Investigation
          </button>
       </footer>

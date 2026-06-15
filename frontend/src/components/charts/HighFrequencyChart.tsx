@@ -3,13 +3,14 @@ import { createChart, ColorType, ISeriesApi, SeriesMarker, IChartApi } from 'lig
 import { useTerminalStore } from '../../state/terminalState';
 import { theme } from '../../theme';
 import { OverlayOrchestrator } from './OverlayOrchestrator';
+import { MicrostructureRenderOverlay } from './MicrostructureRenderOverlay';
 
 interface ChartProps {
   data?: any[];
 }
 
 export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
-  const { marketData, marketContext } = useTerminalStore();
+  const { marketData } = useTerminalStore();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [chartInstance, setChartInstance] = useState<IChartApi | null>(null);
   const [mainSeries, setMainSeries] = useState<ISeriesApi<"Candlestick"> | null>(null);
@@ -71,34 +72,8 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
     setChartInstance(chart);
     setMainSeries(candleSeries);
 
-    // Initial data load simulation
-    const mockData = Array.from({ length: 100 }, (_, i) => ({
-      time: (Date.now() / 1000 - (100 - i) * 60) as any,
-      open: 0.5400 + Math.random() * 0.01,
-      high: 0.5410 + Math.random() * 0.01,
-      low: 0.5390 + Math.random() * 0.01,
-      close: 0.5405 + Math.random() * 0.01,
-    }));
-    candleSeries.setData(mockData);
-
-    // 3. Kronos Structural Cognitive Markers
-    const markers: SeriesMarker<any>[] = [
-      {
-        time: mockData[ mockData.length - 20 ].time,
-        position: 'aboveBar',
-        color: theme.colors.semantic.instability,
-        shape: 'arrowDown',
-        text: 'Structural_Recurrence_Match',
-      },
-      {
-        time: mockData[ mockData.length - 10 ].time,
-        position: 'belowBar',
-        color: theme.colors.semantic.info,
-        shape: 'circle',
-        text: 'Regime_Transition',
-      }
-    ];
-    candleSeries.setMarkers(markers);
+    candleSeries.setData([]);
+    candleSeries.setMarkers([]);
 
     chart.subscribeClick((param) => {
       if (param.time) {
@@ -119,6 +94,19 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mainSeries) return;
+    const sourceData = data || marketData.candles || [];
+    const candleData = sourceData.map((d: any) => ({
+      time: d.time,
+      open: d.open,
+      high: d.high,
+      low: d.low,
+      close: d.close,
+    }));
+    mainSeries.setData(candleData);
+  }, [data, mainSeries, marketData.candles]);
+
   return (
     <div className="w-full h-full relative">
        <div ref={chartContainerRef} className="w-full h-full" />
@@ -126,10 +114,11 @@ export const HighFrequencyChart: React.FC<ChartProps> = ({ data }) => {
        {chartInstance && mainSeries && (
           <OverlayOrchestrator chart={chartInstance} mainSeries={mainSeries} />
        )}
+       <MicrostructureRenderOverlay />
        {/* High-frequency overlay labels */}
        <div className="absolute top-2 left-3 flex items-baseline gap-2 pointer-events-none">
-          <span className="text-xl font-black font-mono text-slate-100 tracking-tighter">0.5421</span>
-          <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-1 rounded">+0.04%</span>
+          <span className="text-xl font-black font-mono text-slate-100 tracking-tighter">{marketData?.metrics?.pressure?.toFixed?.(4) || 'N/A'}</span>
+          <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1 rounded">LIVE_DATA_REQUIRED</span>
        </div>
     </div>
   );

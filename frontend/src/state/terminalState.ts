@@ -1,5 +1,98 @@
 import { create } from 'zustand';
 
+
+const loadSession = () => {
+  try {
+    return JSON.parse(localStorage.getItem('quant_session_v1') || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const restoredSession = loadSession();
+const restoredWorkspaceId = restoredSession.activeWorkspaceId === 'crypto' ? 'market-structure' : restoredSession.activeWorkspaceId;
+
+const frameTimestampMs = (frame: any) => new Date(frame?.timestamp || frame?.replay_anchor || 0).getTime();
+const signalTimestampMs = (signal: any) => new Date(signal?.timestamp || signal?.frame_anchor || 0).getTime();
+const initialActiveOverlays = restoredSession.activeOverlays || ['candlesticks', 'zones'];
+const initialMarketData: MarketDataState = {
+  orderbook: { bids: [], asks: [] },
+  metrics: { imbalance: 0, volatility: 0, liquidity: 0, pressure: 0 },
+  forecasts: [],
+  candles: [],
+  signals: [],
+  anomalies: [],
+  microstructureFrames: [],
+  microstructureSignals: [],
+  latestMicrostructure: null
+};
+
+export const deriveMarketStructureState = (marketData: MarketDataState, replayMode: any, activeOverlays: string[] = initialActiveOverlays, kronos: any = null, runtimeTelemetry: any = null): MarketStructureState => {
+  const frames = marketData.microstructureFrames || [];
+  const signals = marketData.microstructureSignals || [];
+  const forecasts = marketData.forecasts || [];
+  const replayAnchorMs = replayMode?.isActive && replayMode.currentTime ? new Date(replayMode.currentTime).getTime() : null;
+  const activeFrames = replayAnchorMs === null
+    ? frames
+    : frames.filter((frame: any) => frameTimestampMs(frame) <= replayAnchorMs);
+  const activeFrame = replayAnchorMs === null
+    ? (marketData.latestMicrostructure || activeFrames[0] || null)
+    : (activeFrames[0] || null);
+  const activeSignals = (replayAnchorMs === null
+    ? signals
+    : signals.filter((signal: any) => signalTimestampMs(signal) <= replayAnchorMs))
+    .slice(0, 12);
+  const activeForecasts = (replayAnchorMs === null
+    ? forecasts
+    : forecasts.filter((forecast: any) => new Date(forecast?.timestamp || 0).getTime() <= replayAnchorMs))
+    .slice(0, 12);
+  const activeAnalogs = (kronos?.activeAnalogs || []).filter((analog: any) => {
+    if (replayAnchorMs === null || !analog?.timestamp) return true;
+    return new Date(analog.timestamp).getTime() <= replayAnchorMs;
+  });
+  const activeProfile = activeFrame?.volume_profile || [];
+  const activeAnalytics = activeFrame?.metadata?.analytics || {};
+  const primarySignal = activeSignals[0] || null;
+  const overlayOrder = ['footprint', 'profile', 'zones', 'forecast', 'analogs']
+    .filter((overlay) => activeOverlays.includes(overlay));
+  const frameTime = activeFrame ? frameTimestampMs(activeFrame) : null;
+  const isReplayAligned = replayAnchorMs === null || (frameTime !== null && frameTime <= replayAnchorMs);
+
+  return {
+    activeFrame,
+    activeFrames,
+    activeSignals,
+    activeProfile,
+    activeAnalytics,
+    forecasts: {
+      active: activeForecasts,
+      status: runtimeTelemetry?.runtime_orchestrator?.timesfm?.status || runtimeTelemetry?.runtime_orchestrator?.diagnostics?.status || 'UNVERIFIED',
+      stale: Boolean(runtimeTelemetry?.runtime_orchestrator?.timesfm?.stale_inference || runtimeTelemetry?.runtime_orchestrator?.diagnostics?.stale_inference),
+      error: runtimeTelemetry?.runtime_orchestrator?.timesfm?.error || runtimeTelemetry?.runtime_orchestrator?.diagnostics?.error || null,
+    },
+    kronos: {
+      activeAnalogs,
+      status: runtimeTelemetry?.runtime_orchestrator?.kronos?.status || runtimeTelemetry?.runtime_orchestrator?.models?.Kronos || 'UNVERIFIED',
+      reason: runtimeTelemetry?.runtime_orchestrator?.kronos?.reason || (activeAnalogs.length ? null : 'NO_ANALOGS_ACTIVE'),
+      trajectories: activeAnalogs.map((analog: any) => analog.trajectory || []).filter((trajectory: any[]) => trajectory.length > 0),
+      regimeTransitions: kronos?.divergencePoints || [],
+    },
+    dataMode: activeFrame?.data_mode || 'LIMITED_DATA_MODE',
+    replayAnchor: replayMode?.isActive ? replayMode.currentTime : (activeFrame?.replay_anchor || activeFrame?.timestamp || null),
+    isReplayAligned,
+    primarySignal,
+    overlayOrder,
+    interpretation: {
+      severity: primarySignal?.severity || (Math.abs(activeFrame?.depth_imbalance || 0) > 0.75 ? 'high' : 'normal'),
+      contextId: primarySignal?.signal_type || activeFrame?.replay_anchor || activeFrame?.timestamp || null,
+      source: replayMode?.isActive ? 'replay' : 'live',
+      explanation: activeFrame
+        ? `${activeFrame.data_mode}; delta ${Number(activeFrame.order_flow?.delta || 0).toFixed(2)}; imbalance ${Number(activeFrame.depth_imbalance || 0).toFixed(3)}`
+        : 'No market-structure frame available'
+    }
+  };
+};
+
 export interface MarketDataState {
   orderbook: { bids: any[], asks: any[] };
   metrics: {
@@ -9,8 +102,12 @@ export interface MarketDataState {
     pressure: number;
   };
   forecasts: any[];
+  candles: any[];
   signals: any[];
   anomalies: any[];
+  microstructureFrames: any[];
+  microstructureSignals: any[];
+  latestMicrostructure: any | null;
 }
 
 export interface MarketContext {
@@ -78,6 +175,27 @@ export interface InvestigationSession {
   workspaceId: string;
 }
 
+export interface MarketStructureState {
+  activeFrame: any | null;
+  activeFrames: any[];
+  activeSignals: any[];
+  activeProfile: any[];
+  activeAnalytics: Record<string, any>;
+  forecasts: { active: any[]; status: string; stale: boolean; error: string | null };
+  kronos: { activeAnalogs: any[]; status: string; reason: string | null; trajectories: any[]; regimeTransitions: any[] };
+  dataMode: string;
+  replayAnchor: string | null;
+  isReplayAligned: boolean;
+  primarySignal: any | null;
+  overlayOrder: string[];
+  interpretation: {
+    severity: string;
+    contextId: string | null;
+    source: 'live' | 'replay';
+    explanation: string;
+  };
+}
+
 interface TerminalState {
   isConnected: boolean;
   setConnected: (status: boolean) => void;
@@ -86,6 +204,9 @@ interface TerminalState {
 
   marketData: MarketDataState;
   updateMarketData: (update: Partial<MarketDataState>) => void;
+  addMicrostructureFrame: (frame: any) => void;
+  addMicrostructureSignal: (signal: any) => void;
+  marketStructure: MarketStructureState;
 
   marketContext: MarketContext | null;
   setMarketContext: (context: MarketContext) => void;
@@ -115,7 +236,8 @@ interface TerminalState {
     currentTime: string | null;
     speed: number;
   };
-  setReplayMode: (active: boolean, time?: string) => void;
+  setReplayMode: (active: boolean, time?: string | null) => void;
+  stepReplayTime: (deltaMs: number) => void;
   setReplaySpeed: (speed: number) => void;
 
   // Workspace Composition & Presets
@@ -139,7 +261,7 @@ interface TerminalState {
 
   // Contextual Ripple System
   contextualFocus: {
-    type: 'price' | 'signal' | 'anomaly' | 'event' | 'forecast' | null;
+    type: 'price' | 'signal' | 'anomaly' | 'event' | 'forecast' | 'microstructure' | null;
     id: string | number | null;
     metadata: any;
   };
@@ -177,24 +299,38 @@ interface TerminalState {
   activeInvestigation: InvestigationSession | null;
   setInvestigation: (inv: InvestigationSession | null) => void;
   saveInvestigation: () => void;
+
+  runtimeTelemetry: any | null;
+  setRuntimeTelemetry: (telemetry: any) => void;
 }
 
 export const useTerminalStore = create<TerminalState>((set, get) => ({
   isConnected: false,
   setConnected: (status) => set({ isConnected: status }),
-  activeSymbol: "BTC",
+  activeSymbol: restoredSession.activeSymbol || "BTC",
   setActiveSymbol: (symbol) => set({ activeSymbol: symbol }),
 
-  marketData: {
-    orderbook: { bids: [], asks: [] },
-    metrics: { imbalance: 0, volatility: 0, liquidity: 0, pressure: 0 },
-    forecasts: [],
-    signals: [],
-    anomalies: []
-  },
-  updateMarketData: (update) => set((state) => ({
-    marketData: { ...state.marketData, ...update }
-  })),
+  marketData: initialMarketData,
+  marketStructure: deriveMarketStructureState(initialMarketData, restoredSession.replayMode || { isActive: false, currentTime: null, speed: 1.0 }, initialActiveOverlays, null, null),
+  updateMarketData: (update) => set((state) => {
+    const marketData = { ...state.marketData, ...update };
+    return { marketData, marketStructure: deriveMarketStructureState(marketData, state.replayMode, state.activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
+  addMicrostructureFrame: (frame) => set((state) => {
+    const marketData = {
+      ...state.marketData,
+      latestMicrostructure: frame,
+      microstructureFrames: [frame, ...(state.marketData.microstructureFrames || [])].slice(0, 512)
+    };
+    return { marketData, marketStructure: deriveMarketStructureState(marketData, state.replayMode, state.activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
+  addMicrostructureSignal: (signal) => set((state) => {
+    const marketData = {
+      ...state.marketData,
+      microstructureSignals: [signal, ...(state.marketData.microstructureSignals || [])].slice(0, 128)
+    };
+    return { marketData, marketStructure: deriveMarketStructureState(marketData, state.replayMode, state.activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
 
   marketContext: null,
   setMarketContext: (context) => set({ marketContext: context }),
@@ -210,8 +346,11 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
   decisionIntelligence: null,
   setDecisionIntelligence: (decision) => set({ decisionIntelligence: decision }),
 
-  workspaces: [{ id: 'prediction', name: 'Prediction Markets' }],
-  activeWorkspaceId: 'prediction',
+  workspaces: [
+    { id: 'prediction', name: 'Prediction Markets' },
+    { id: 'market-structure', name: 'Market Structure' }
+  ],
+  activeWorkspaceId: restoredWorkspaceId || 'prediction',
   setWorkspace: (id) => set({ activeWorkspaceId: id }),
 
   stats: { latency: 0, throughput: 0, droppedEvents: 0 },
@@ -219,17 +358,28 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     stats: { ...state.stats, ...update }
   })),
 
-  replayMode: {
+  replayMode: restoredSession.replayMode || {
     isActive: false,
     currentTime: null,
     speed: 1.0,
   },
-  setReplayMode: (active, time) => set((state) => ({
-    replayMode: { ...state.replayMode, isActive: active, currentTime: time || state.replayMode.currentTime }
-  })),
-  setReplaySpeed: (speed) => set((state) => ({
-    replayMode: { ...state.replayMode, speed }
-  })),
+  setReplayMode: (active, time) => set((state) => {
+    const replayMode = {
+      ...state.replayMode,
+      isActive: active,
+      currentTime: active ? (time ?? state.replayMode.currentTime ?? new Date().toISOString()) : null
+    };
+    return { replayMode, marketStructure: deriveMarketStructureState(state.marketData, replayMode, state.activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
+  stepReplayTime: (deltaMs) => set((state) => {
+    const anchor = state.replayMode.currentTime ? new Date(state.replayMode.currentTime).getTime() : Date.now();
+    const replayMode = { ...state.replayMode, isActive: true, currentTime: new Date(anchor + deltaMs).toISOString() };
+    return { replayMode, marketStructure: deriveMarketStructureState(state.marketData, replayMode, state.activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
+  setReplaySpeed: (speed) => set((state) => {
+    const replayMode = { ...state.replayMode, speed };
+    return { replayMode, marketStructure: deriveMarketStructureState(state.marketData, replayMode, state.activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
 
   workspaceConfig: JSON.parse(localStorage.getItem('quant_workspaces') || '{}'),
   workspacePresets: JSON.parse(localStorage.getItem('quant_presets') || '[]'),
@@ -277,12 +427,13 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     contextualFocus: { type, id, metadata: metadata || null }
   }),
 
-  activeOverlays: ['candlesticks', 'zones'],
-  toggleOverlay: (id) => set((state) => ({
-    activeOverlays: state.activeOverlays.includes(id)
+  activeOverlays: initialActiveOverlays,
+  toggleOverlay: (id) => set((state) => {
+    const activeOverlays = state.activeOverlays.includes(id)
       ? state.activeOverlays.filter(o => o !== id)
-      : [...state.activeOverlays, id]
-  })),
+      : [...state.activeOverlays, id];
+    return { activeOverlays, marketStructure: deriveMarketStructureState(state.marketData, state.replayMode, activeOverlays, state.kronos, state.runtimeTelemetry) };
+  }),
 
   isCommandPaletteOpen: false,
   setCommandPalette: (open) => set({ isCommandPaletteOpen: open }),
@@ -291,10 +442,10 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
   setOperationalStress: (level) => set({ operationalStressLevel: level }),
 
   connectors: {
-    polymarket: { enabled: true, status: 'CONNECTED', latency: 42 },
-    binance: { enabled: true, status: 'CONNECTED', latency: 12 },
-    bybit: { enabled: false, status: 'IDLE', latency: 0 },
-    okx: { enabled: true, status: 'CONNECTED', latency: 18 }
+    polymarket: { enabled: false, status: 'UNVERIFIED', latency: 0 },
+    binance: { enabled: false, status: 'UNVERIFIED', latency: 0 },
+    bybit: { enabled: false, status: 'UNVERIFIED', latency: 0 },
+    okx: { enabled: false, status: 'UNVERIFIED', latency: 0 }
   },
   toggleConnector: (id) => set((state) => ({
     connectors: {
@@ -311,14 +462,16 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     structuralAlignment: 1.0,
     divergencePoints: []
   },
-  setKronosSettings: (update) => set((state) => ({
-    kronos: { ...state.kronos, ...update }
-  })),
-  setActiveAnalogs: (analogs) => set((state) => ({
-    kronos: { ...state.kronos, activeAnalogs: analogs }
-  })),
+  setKronosSettings: (update) => set((state) => {
+    const kronos = { ...state.kronos, ...update };
+    return { kronos, marketStructure: deriveMarketStructureState(state.marketData, state.replayMode, state.activeOverlays, kronos, state.runtimeTelemetry) };
+  }),
+  setActiveAnalogs: (analogs) => set((state) => {
+    const kronos = { ...state.kronos, activeAnalogs: analogs };
+    return { kronos, marketStructure: deriveMarketStructureState(state.marketData, state.replayMode, state.activeOverlays, kronos, state.runtimeTelemetry) };
+  }),
 
-  activeInvestigation: null,
+  activeInvestigation: restoredSession.activeInvestigation || null,
   setInvestigation: (inv) => set({ activeInvestigation: inv }),
   saveInvestigation: () => {
     const inv = get().activeInvestigation;
@@ -326,5 +479,11 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
         const history = JSON.parse(localStorage.getItem('quant_investigations') || '[]');
         localStorage.setItem('quant_investigations', JSON.stringify([inv, ...history.filter((h: any) => h.id !== inv.id)]));
     }
-  }
+  },
+
+  runtimeTelemetry: null,
+  setRuntimeTelemetry: (telemetry) => set((state) => ({
+    runtimeTelemetry: telemetry,
+    marketStructure: deriveMarketStructureState(state.marketData, state.replayMode, state.activeOverlays, state.kronos, telemetry)
+  }))
 }));

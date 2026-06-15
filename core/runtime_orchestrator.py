@@ -4,7 +4,7 @@ import time
 from enum import Enum, auto
 from typing import Dict, List, Any, Optional
 from core.event_bus import EventBus
-from forecasting.timesfm.runtime import TimesFMRuntimeBridge
+from forecasting.timesfm.runtime import get_timesfm_runtime
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class ModelRuntimeOrchestrator:
     """
     def __init__(self, event_bus: EventBus):
         self.event_bus = event_bus
-        self.timesfm = TimesFMRuntimeBridge()
+        self.timesfm = get_timesfm_runtime()
         self.active_models: Dict[str, ModelStatus] = {
             "TimesFM": ModelStatus.OFFLINE,
             "Kronos": ModelStatus.OFFLINE
@@ -42,16 +42,23 @@ class ModelRuntimeOrchestrator:
         Prioritized inference request handler with status-aware routing.
         """
         if model_name == "TimesFM":
-            self.active_models["TimesFM"] = ModelStatus.ACTIVE
-            return await self.timesfm.run_inference(context_data)
+            self.active_models["TimesFM"] = ModelStatus.WARMING_UP
+            result = await self.timesfm.run_inference(context_data)
+            diagnostics = self.timesfm.get_diagnostics()
+            self.active_models["TimesFM"] = ModelStatus.ACTIVE if diagnostics.get("real_inference") and not diagnostics.get("stale_inference") else ModelStatus.DEGRADED
+            return result
 
         return None
 
     def get_runtime_telemetry(self) -> Dict:
+        diagnostics = self.timesfm.get_diagnostics()
+        self.active_models["TimesFM"] = ModelStatus.ACTIVE if diagnostics.get("real_inference") and not diagnostics.get("stale_inference") else ModelStatus.DEGRADED
         return {
             "models": {name: status.name for name, status in self.active_models.items()},
             "stats": self.inference_stats,
-            "diagnostics": self.timesfm.get_diagnostics()
+            "diagnostics": diagnostics,
+            "timesfm": diagnostics,
+            "kronos": {"status": self.active_models["Kronos"].name, "reason": "BACKEND_UNVERIFIED"}
         }
 
     async def sync_replay(self, replay_timestamp: float):

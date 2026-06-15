@@ -3,6 +3,11 @@ export const fetchEngineStatus = async () => {
   return await resp.json();
 };
 
+export const fetchRuntimeTelemetry = async () => {
+  const resp = await fetch('/runtime/telemetry');
+  return await resp.json();
+};
+
 export class DataStreamService {
   private ws: WebSocket | null = null;
   private listeners: Set<(data: any) => void> = new Set();

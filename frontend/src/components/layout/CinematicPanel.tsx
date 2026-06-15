@@ -6,7 +6,7 @@ import { ContextualHelp } from './ContextualHelp';
 
 interface CinematicPanelProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   helpTitle?: string;
   helpExplanation?: string;
