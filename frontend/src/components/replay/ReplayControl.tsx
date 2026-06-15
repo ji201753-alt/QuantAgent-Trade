@@ -4,7 +4,7 @@ import { useTerminalStore } from '../../state/terminalState';
 import { theme } from '../../theme';
 
 export const ReplayControl: React.FC = () => {
-  const { replayMode, setReplayMode, setReplaySpeed } = useTerminalStore();
+  const { replayMode, setReplayMode, setReplaySpeed, stepReplayTime } = useTerminalStore();
 
   return (
     <div className={`border rounded p-4 h-full flex flex-col justify-between shadow-2xl transition-all duration-700 ${
@@ -26,7 +26,7 @@ export const ReplayControl: React.FC = () => {
       </div>
 
       <div className="flex-1 flex items-center justify-center gap-6">
-         <button className="text-slate-500 hover:text-white transition-colors"><SkipBack size={20} /></button>
+         <button onClick={() => stepReplayTime(-60_000)} className="text-slate-500 hover:text-white transition-colors" aria-label="Step replay back one minute"><SkipBack size={20} /></button>
          <button
             onClick={() => setReplayMode(!replayMode.isActive)}
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
@@ -35,7 +35,7 @@ export const ReplayControl: React.FC = () => {
          >
             {replayMode.isActive ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
          </button>
-         <button className="text-slate-500 hover:text-white transition-colors"><SkipForward size={20} /></button>
+         <button onClick={() => stepReplayTime(60_000)} className="text-slate-500 hover:text-white transition-colors" aria-label="Step replay forward one minute"><SkipForward size={20} /></button>
       </div>
 
       <div className="mt-4 pt-4 border-t border-slate-900 flex justify-between items-center">
@@ -52,7 +52,7 @@ export const ReplayControl: React.FC = () => {
                </button>
             ))}
          </div>
-         <button className="text-[9px] font-black uppercase text-indigo-400 hover:underline">Exit_to_Live</button>
+         <button onClick={() => setReplayMode(false, null)} className="text-[9px] font-black uppercase text-indigo-400 hover:underline">Exit_to_Live</button>
       </div>
     </div>
   );

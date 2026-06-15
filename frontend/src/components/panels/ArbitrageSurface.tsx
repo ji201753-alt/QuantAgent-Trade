@@ -35,12 +35,13 @@ const SpreadNode: React.FC<{ label: string; spread: number; stability: number; s
 export const ArbitrageSurface: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-1 p-1 bg-black">
+      <div className="shrink-0 border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[9px] font-black uppercase tracking-widest px-3 py-1">EXPERIMENTAL_STATIC_SURFACE · arbitrage runtime feed unverified</div>
       {/* Geopolitical Spread Surface */}
       <div className="grid grid-cols-4 gap-1 shrink-0 h-44">
-        <SpreadNode label="Argentina_ARS" spread={1.42} stability={0.84} status="STABLE" color={theme.colors.semantic.success} />
-        <SpreadNode label="Brazil_BRL" spread={0.68} stability={0.92} status="SYNCHRONIZED" color={theme.colors.semantic.info} />
-        <SpreadNode label="Colombia_COP" spread={2.15} stability={0.34} status="FRAGILE" color={theme.colors.semantic.warning} />
-        <SpreadNode label="Mexico_MXN" spread={0.24} stability={0.98} status="COMPRESSED" color={theme.colors.semantic.confidence} />
+        <SpreadNode label="Argentina_ARS" spread={1.42} stability={0.84} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
+        <SpreadNode label="Brazil_BRL" spread={0.68} stability={0.92} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
+        <SpreadNode label="Colombia_COP" spread={2.15} stability={0.34} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
+        <SpreadNode label="Mexico_MXN" spread={0.24} stability={0.98} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
       </div>
 
       <div className="flex-1 grid grid-cols-12 gap-1 overflow-hidden">

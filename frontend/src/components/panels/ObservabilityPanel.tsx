@@ -5,7 +5,12 @@ import { theme } from '../../theme';
 import { Activity, ShieldCheck, Database, Zap } from 'lucide-react';
 
 export const ObservabilityPanel: React.FC = () => {
-  const { stats, isConnected } = useTerminalStore();
+  const { stats, isConnected, runtimeTelemetry } = useTerminalStore();
+  const eventBus = runtimeTelemetry?.event_bus;
+  const runtimeDiag = runtimeTelemetry?.runtime_orchestrator?.diagnostics;
+  const busLoad = eventBus?.processed_total ?? 'N/A';
+  const latency = runtimeDiag?.latency_ms ? `${Number(runtimeDiag.latency_ms).toFixed(2)}ms` : 'N/A';
+  const runtimeState = runtimeDiag?.status || 'UNVERIFIED';
 
   return (
     <CinematicPanel
@@ -22,11 +27,11 @@ export const ObservabilityPanel: React.FC = () => {
         <div className="grid grid-cols-2 gap-2 text-indigo-400 font-bold">
            <div className="bg-slate-900/30 p-2 rounded border border-slate-800">
              <span className="text-slate-500 block mb-1">Bus_Load</span>
-             <span>142 msg/s</span>
+             <span>{busLoad}</span>
            </div>
            <div className="bg-slate-900/30 p-2 rounded border border-slate-800">
              <span className="text-slate-500 block mb-1">Latency</span>
-             <span>12ms</span>
+             <span>{latency}</span>
            </div>
         </div>
 
@@ -36,15 +41,13 @@ export const ObservabilityPanel: React.FC = () => {
            <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                  <span className="text-slate-400">TimesFM_Engine</span>
-                 <span className="text-indigo-400 font-bold">ACTIVE_GPU</span>
+                 <span className="text-indigo-400 font-bold">{runtimeState}</span>
               </div>
               <div className="flex justify-between items-center">
                  <span className="text-slate-400">Inference_Lat</span>
-                 <span className="text-slate-200 font-mono">42ms</span>
+                 <span className="text-slate-200 font-mono">{latency}</span>
               </div>
-              <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                 <div className="h-full bg-indigo-500 w-[82%]" />
-              </div>
+              <div className="text-[8px] text-amber-400">Capacity bar hidden until real utilization telemetry is available</div>
            </div>
         </div>
       </div>

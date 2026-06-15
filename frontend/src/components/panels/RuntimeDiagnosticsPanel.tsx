@@ -1,9 +1,10 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { CinematicPanel } from '../layout/CinematicPanel';
 import { theme } from '../../theme';
-import { Cpu, Activity, Database, ShieldCheck, Zap, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Cpu, Database, Zap, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useTerminalStore } from '../../state/terminalState';
+import { useEffect } from 'react';
+import { fetchRuntimeTelemetry } from '../../services/api';
 
 const DiagnosticRow: React.FC<{ label: string; value: string | number; sub?: string; color?: string; isDegraded?: boolean }> = ({ label, value, sub, color = 'text-indigo-400', isDegraded }) => (
   <div className={`flex justify-between items-center py-2 border-b border-white/[0.03] ${isDegraded ? 'bg-red-500/5' : ''}`}>
@@ -19,8 +20,32 @@ const DiagnosticRow: React.FC<{ label: string; value: string | number; sub?: str
 );
 
 export const RuntimeDiagnosticsPanel: React.FC = () => {
-  const { stats } = useTerminalStore();
+  const { stats, runtimeTelemetry, setRuntimeTelemetry, marketStructure } = useTerminalStore();
   const isOverloaded = stats.droppedEvents > 0;
+  const modelDiag = runtimeTelemetry?.runtime_orchestrator?.timesfm || runtimeTelemetry?.runtime_orchestrator?.diagnostics;
+  const eventBus = runtimeTelemetry?.event_bus;
+  const timesfmStatus = modelDiag?.status || 'UNKNOWN';
+  const device = modelDiag?.device || 'UNKNOWN';
+  const latency = modelDiag?.latency_ms ? `${Number(modelDiag.latency_ms).toFixed(2)}ms` : 'N/A';
+  const queueDepth = eventBus?.queue_depth ?? 'N/A';
+
+  useEffect(() => {
+    let mounted = true;
+    const poll = async () => {
+      try {
+        const telemetry = await fetchRuntimeTelemetry();
+        if (mounted) setRuntimeTelemetry(telemetry);
+      } catch {
+        // keep last known telemetry; avoid fabricating values
+      }
+    };
+    poll();
+    const id = setInterval(poll, 3000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, [setRuntimeTelemetry]);
 
   return (
     <CinematicPanel title="Operational_Runtime_Diagnostics">
@@ -31,10 +56,10 @@ export const RuntimeDiagnosticsPanel: React.FC = () => {
                <Zap size={14} className="text-indigo-400" />
                <h3 className="text-[10px] font-black text-white uppercase tracking-widest italic">Model_Runtime_Orchestration</h3>
             </div>
-            <DiagnosticRow label="TimesFM_Runtime" value="ACTIVE_GPU" sub="Local_Inference" />
-            <DiagnosticRow label="Inference_Lat" value="42.5ms" sub="Rolling_Average" color="text-green-400" />
-            <DiagnosticRow label="Queue_Pressure" value={isOverloaded ? "HIGH" : "NOMINAL"} sub="Inference_Queue" isDegraded={isOverloaded} />
-            <DiagnosticRow label="Replay_Sync" value="LOCKED" sub="Deterministic_Mode" color="text-cyan-400" />
+            <DiagnosticRow label="TimesFM_Runtime" value={`${timesfmStatus}_${device}`} sub={modelDiag?.error || 'Runtime_Telemetry'} isDegraded={['ERROR', 'UNAVAILABLE', 'STALE_INFERENCE'].includes(timesfmStatus)} />
+            <DiagnosticRow label="Inference_Lat" value={latency} sub="Runtime_Observed" color="text-green-400" />
+            <DiagnosticRow label="Queue_Pressure" value={`${queueDepth}`} sub="EventBus_QueueDepth" isDegraded={isOverloaded} />
+            <DiagnosticRow label="Replay_Sync" value="UNVERIFIED" sub="Determinism_Audit_Pending" color="text-amber-400" />
          </section>
 
          {/* Cognitive Indexing Diagnostics */}
@@ -43,8 +68,8 @@ export const RuntimeDiagnosticsPanel: React.FC = () => {
                <Database size={14} className="text-amber-500" />
                <h3 className="text-[10px] font-black text-white uppercase tracking-widest italic">Structural_Memory_Runtime</h3>
             </div>
-            <DiagnosticRow label="Kronos_Core" value="ACTIVE" sub="Indexing_Live" />
-            <DiagnosticRow label="Search_Latency" value="12ms" sub="Similarity_HNSW" color="text-green-400" />
+            <DiagnosticRow label="Kronos_Core" value={marketStructure.kronos.status || 'UNKNOWN'} sub={marketStructure.kronos.reason || 'Runtime_Reported'} isDegraded={marketStructure.kronos.status !== 'ACTIVE'} />
+            <DiagnosticRow label="Search_Latency" value="UNVERIFIED" sub="Validation_Pending" color="text-amber-400" />
          </section>
 
          {/* Hardware Acceleration Visibility */}
@@ -53,29 +78,16 @@ export const RuntimeDiagnosticsPanel: React.FC = () => {
                <Cpu size={14} className="text-slate-500" />
                <h3 className="text-[10px] font-black text-white uppercase tracking-widest italic">Hardware_Resource_Utilization</h3>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-1">
-                  <span className="text-[8px] text-slate-600 font-black uppercase">GPU_UTIL</span>
-                  <div className="text-xs font-mono font-black text-white">42%</div>
-                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                     <motion.div animate={{ width: '42%' }} className="h-full bg-indigo-500" />
-                  </div>
-               </div>
-               <div className="space-y-1">
-                  <span className="text-[8px] text-slate-600 font-black uppercase">VRAM_LOAD</span>
-                  <div className="text-xs font-mono font-black text-white">8.4GB</div>
-                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                     <motion.div animate={{ width: '68%' }} className="h-full bg-indigo-500" />
-                  </div>
-               </div>
+            <div className="text-[9px] text-amber-400 uppercase font-mono">
+               Hardware utilization telemetry unavailable until backend GPU/VRAM instrumentation is connected.
             </div>
          </section>
 
          <div className="pt-2 flex justify-between">
-            <button className="flex items-center gap-2 text-[9px] font-black uppercase text-indigo-400 hover:text-white transition-colors">
-               <RefreshCw size={10} /> Recalibrate_Inference
+            <button disabled title="Runtime recalibration endpoint is not implemented yet" className="flex items-center gap-2 text-[9px] font-black uppercase text-amber-400/70 cursor-not-allowed">
+               <RefreshCw size={10} /> Recalibrate_Unavailable
             </button>
-            <span className="text-[7px] text-slate-700 font-black uppercase tracking-tighter">RC_VERSION: 1.7.0_STABLE</span>
+            <span className="text-[7px] text-slate-700 font-black uppercase tracking-tighter">BUILD_STATE: OPERATIONAL_RECOVERY</span>
          </div>
       </div>
     </CinematicPanel>

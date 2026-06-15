@@ -34,11 +34,12 @@ const EcosystemNode: React.FC<{ name: string; pressure: number; status: string; 
 export const MacroEcosystemPanel: React.FC = () => {
   return (
     <div className="h-full flex flex-col gap-1 p-1 bg-black">
+      <div className="shrink-0 border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[9px] font-black uppercase tracking-widest px-3 py-1">EXPERIMENTAL_STATIC_SURFACE · macro ecosystem telemetry unverified</div>
       <div className="grid grid-cols-4 gap-1 h-32">
-        <EcosystemNode name="Polymarket_CLOB" pressure={0.42} status="STABLE" color={theme.colors.semantic.success} />
-        <EcosystemNode name="Binance_Spot" pressure={0.78} status="ELEVATED" color={theme.colors.semantic.warning} />
-        <EcosystemNode name="CME_Futures" pressure={0.15} status="CALM" color={theme.colors.semantic.info} />
-        <EcosystemNode name="DVOL_Index" pressure={0.88} status="CRITICAL" color={theme.colors.semantic.error} />
+        <EcosystemNode name="Polymarket_CLOB" pressure={0.42} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
+        <EcosystemNode name="Binance_Spot" pressure={0.78} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
+        <EcosystemNode name="CME_Futures" pressure={0.15} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
+        <EcosystemNode name="DVOL_Index" pressure={0.88} status="UNVERIFIED" color={theme.colors.semantic.neutral} />
       </div>
 
       <div className="flex-1 grid grid-cols-12 gap-1 overflow-hidden">

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, Send, Shield, Zap, Target, AlertTriangle, Link as LinkIcon, Clock, Database } from 'lucide-react';
+import { Send, AlertTriangle, Database } from 'lucide-react';
 import { CinematicPanel } from '../layout/CinematicPanel';
 import { useTerminalStore } from '../../state/terminalState';
-import { theme } from '../../theme';
 
 interface Message {
   id: string;
@@ -19,14 +18,44 @@ export const OperationalCopilot: React.FC = () => {
     {
       id: '1',
       role: 'assistant',
-      content: "Operational analyst active. Intelligence core and forensic chronology synchronized.",
-      context: "RUNTIME: STABLE"
+      content: 'Operational analyst active. Responses are grounded only in current workstation state and will report unavailable evidence explicitly.',
+      context: 'RUNTIME: GROUNDED'
     }
   ]);
   const [input, setInput] = useState('');
-  const { activeSymbol, stats, activeWorkspaceId, replayMode, activeOverlays } = useTerminalStore();
+  const {
+    activeSymbol,
+    stats,
+    activeWorkspaceId,
+    replayMode,
+    activeOverlays,
+    marketData,
+    marketStructure,
+    runtimeTelemetry,
+    kronos,
+    setWorkspace,
+    setContextualFocus,
+  } = useTerminalStore();
 
-  const isDegraded = stats.droppedEvents > 0;
+  const isDegraded = stats.droppedEvents > 0 || runtimeTelemetry?.runtime_orchestrator?.diagnostics?.stale_inference;
+
+  const followEvidence = (target: string) => {
+    if (target === 'forecast') {
+      setWorkspace('market-structure');
+      setContextualFocus('forecast', marketStructure.forecasts.active[0]?.horizon || 'latest', marketStructure.forecasts.active[0] || marketStructure.forecasts);
+    }
+    if (target === 'microstructure') {
+      setWorkspace('market-structure');
+      setContextualFocus('microstructure', marketStructure.interpretation.contextId || 'microstructure', marketStructure.activeFrame || marketStructure.primarySignal);
+    }
+    if (target === 'kronos') {
+      setWorkspace('recurrence');
+      setContextualFocus('event', marketStructure.kronos.activeAnalogs[0]?.analog_id || 'kronos', marketStructure.kronos.activeAnalogs[0] || marketStructure.kronos);
+    }
+    if (target === 'replay') {
+      setWorkspace('replay');
+    }
+  };
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -34,37 +63,36 @@ export const OperationalCopilot: React.FC = () => {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
 
-    setTimeout(() => {
-        let content = '';
-        let context = `INTELLIGENCE_OS // ${activeWorkspaceId.toUpperCase()}`;
-        let evidenceLinks: Message['evidenceLinks'] = [];
+    const latestForecast = marketStructure.forecasts.active[0];
+    const latestFrame = marketStructure.activeFrame;
+    const latestStructureSignal = marketStructure.primarySignal;
+    const modelStatus = marketStructure.forecasts.status || runtimeTelemetry?.runtime_orchestrator?.diagnostics?.status || 'UNVERIFIED';
+    const kronosStatus = marketStructure.kronos.status;
+    const context = replayMode.isActive ? `REPLAY // ${replayMode.currentTime}` : `LIVE // ${activeWorkspaceId.toUpperCase()}`;
+    const content = [
+      `Symbol ${activeSymbol}; overlays active: ${activeOverlays.join(', ') || 'none'}.`,
+      `TimesFM state: ${modelStatus}${latestForecast ? `; latest ${latestForecast.horizon} forecast ${Number(latestForecast.prediction).toFixed(4)}` : '; no runtime forecast available'}.`,
+      latestFrame ? `Microstructure ${latestFrame.data_mode}; delta ${Number(latestFrame.order_flow?.delta || 0).toFixed(2)}, imbalance ${Number(latestFrame.depth_imbalance || 0).toFixed(3)}${latestStructureSignal ? `; latest structure event ${latestStructureSignal.signal_type} (${Number(latestStructureSignal.value || 0).toFixed(2)})` : ''}.` : 'No replayable microstructure frame available yet.',
+      marketStructure.kronos.activeAnalogs.length ? `Kronos ${kronosStatus}; active analogs ${marketStructure.kronos.activeAnalogs.length}.` : `Kronos ${kronosStatus}; ${marketStructure.kronos.reason || 'no active analog evidence available'}.`,
+      replayMode.isActive ? 'Replay mode is active; inspect chronology and evidence before returning to live.' : 'Live mode active; use alerts or timeline events to anchor replay when investigating.',
+    ].join(' ');
 
-        // Strict grounding logic: derived directly from platform state
-        if (replayMode.isActive) {
-            content = `Forensic analysis at ${replayMode.currentTime} identifies a structural recurrence cluster. Current liquidity imbalance correlates with analog K-8421. Forecasting indicates divergence at T+5m horizon. Grounded in chronology seq2.`;
-            evidenceLinks = [
-                { label: 'View_Analog_K8421', target: 'analog_k8421' },
-                { label: 'Focus_T+5m_Divergence', target: 'forecast_drift' },
-                { label: 'Inspect_Chronology_Seq2', target: 'chron_seq2' }
-            ];
-            context = `REPLAY // ${replayMode.currentTime}`;
-        } else if (isDegraded) {
-            content = "Warning: Model runtime is experiencing high queue pressure. Forecast accuracy may be stale. Structural analogs remain grounded. Evidence quality may be impacted by ingestion lag.";
-            context = "RUNTIME: DEGRADED";
-        } else {
-            content = `Monitoring ${activeSymbol} live ingestion. Current structural evolution aligns with high-confidence regime expectations. ${activeOverlays.length} intelligence layers synchronized. No immediate escalation precursors detected.`;
-        }
+    const evidenceLinks: Message['evidenceLinks'] = [
+      { label: 'Forecast', target: 'forecast' },
+      { label: 'Microstructure', target: 'microstructure' },
+      { label: 'Kronos', target: 'kronos' },
+      { label: 'Replay', target: 'replay' },
+    ];
 
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content,
-        context,
-        isStatus: isDegraded,
-        evidenceLinks
-      };
-      setMessages(prev => [...prev, response]);
-    }, 600);
+    const response: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content,
+      context,
+      isStatus: isDegraded,
+      evidenceLinks
+    };
+    setMessages(prev => [...prev, response]);
   };
 
   return (
@@ -93,7 +121,7 @@ export const OperationalCopilot: React.FC = () => {
                   {m.evidenceLinks && m.evidenceLinks.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2 pt-3 border-t border-white/5">
                         {m.evidenceLinks.map((link, i) => (
-                            <button key={i} className="flex items-center gap-1.5 px-2 py-1 bg-black/40 border border-white/10 rounded-sm text-[8px] text-indigo-400 hover:text-white hover:border-indigo-500/50 transition-all">
+                            <button key={i} onClick={() => followEvidence(link.target)} className="flex items-center gap-1.5 px-2 py-1 bg-black/40 border border-white/10 rounded-sm text-[8px] text-indigo-400 hover:text-white hover:border-indigo-500/50 transition-all">
                                 <Database size={10} /> {link.label}
                             </button>
                         ))}
@@ -111,7 +139,7 @@ export const OperationalCopilot: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Query forensic chronology..."
+              placeholder="Query grounded workstation state..."
               className="w-full bg-slate-900/50 border border-slate-800 rounded-sm py-2 pl-3 pr-10 text-[11px] text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all"
             />
             <button onClick={handleSend} className="absolute right-2 text-indigo-500 hover:text-indigo-400">

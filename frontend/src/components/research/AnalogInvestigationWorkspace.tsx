@@ -1,11 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ComparisonWorkbench } from '../research/ComparisonWorkbench';
-import { CinematicPanel } from '../layout/CinematicPanel';
-import { theme } from '../../theme';
-import { Activity, Target, Share2 } from 'lucide-react';
+import { Target } from 'lucide-react';
+import { useTerminalStore } from '../../state/terminalState';
 
 export const AnalogInvestigationWorkspace: React.FC = () => {
+  const { marketStructure } = useTerminalStore();
+  const analogCount = marketStructure.kronos.activeAnalogs.length;
+  const status = marketStructure.kronos.status;
+  const reason = marketStructure.kronos.reason;
+
   return (
     <div className="h-full flex flex-col bg-black">
       <header className="h-12 border-b border-white/5 bg-[#050505] flex items-center px-6 justify-between shrink-0">
@@ -16,7 +19,8 @@ export const AnalogInvestigationWorkspace: React.FC = () => {
             <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-300 italic">Kronos_Forensic_Workbench</h2>
          </div>
          <div className="flex gap-4">
-            <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest bg-black/40 px-3 py-1 rounded border border-white/5">MODE: STRUCTURAL_COMPARISON</span>
+            <span className={`text-[9px] font-black uppercase tracking-widest bg-black/40 px-3 py-1 rounded border ${status === 'ACTIVE' ? 'text-green-400 border-green-500/20' : 'text-amber-400 border-amber-500/20'}`}>Kronos: {status}</span>
+            <span className="text-[9px] font-black uppercase text-slate-500 tracking-widest bg-black/40 px-3 py-1 rounded border border-white/5">Context: {marketStructure.dataMode}</span>
          </div>
       </header>
 
@@ -26,19 +30,11 @@ export const AnalogInvestigationWorkspace: React.FC = () => {
 
       <footer className="h-10 border-t border-white/5 bg-[#050505] flex items-center px-6 justify-between shrink-0 font-mono text-[9px] text-slate-500 uppercase">
          <div className="flex gap-8">
-            <span>Analog_Bank: 14,241 Archetypes</span>
-            <span className="text-indigo-400 font-bold">Similarity_Search: Active</span>
+            <span>Active_Analogs: {analogCount}</span>
+            <span>Regime_Transitions: {marketStructure.kronos.regimeTransitions.length}</span>
+            <span>Trajectory_Sets: {marketStructure.kronos.trajectories.length}</span>
          </div>
-         <div className="flex gap-6 items-center">
-            <div className="h-4 w-px bg-slate-800" />
-            <div className="flex items-center gap-2">
-               <span className="text-slate-600">Factor_Sim:</span>
-               <span className="text-white font-bold">0.82 (VBT_ALIGNED)</span>
-            </div>
-            <button className="bg-indigo-600 text-white px-3 py-1 rounded-sm font-black hover:bg-indigo-500 transition-all">Launch_VBT_Study</button>
-            <button className="hover:text-indigo-400 transition-colors">Sync_Traversals</button>
-            <button className="hover:text-indigo-400 transition-colors">Export_Forensic_Study</button>
-         </div>
+         <span className="text-amber-500">{reason || marketStructure.interpretation.explanation}</span>
       </footer>
     </div>
   );

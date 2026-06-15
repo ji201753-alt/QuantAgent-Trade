@@ -5,7 +5,7 @@ import { useTerminalStore } from '../../state/terminalState';
 import { theme } from '../../theme';
 
 export const CommandPalette: React.FC = () => {
-  const { isCommandPaletteOpen, setCommandPalette } = useTerminalStore();
+  const { isCommandPaletteOpen, setCommandPalette, setWorkspace, toggleOverlay } = useTerminalStore();
   const [input, setInput] = useState('');
 
   useEffect(() => {
@@ -23,10 +23,11 @@ export const CommandPalette: React.FC = () => {
   if (!isCommandPaletteOpen) return null;
 
   const actions = [
-    { icon: Shield, label: 'Jump to Active Investigation', cmd: 'GOTO_INV' },
-    { icon: Target, label: 'Compare Historical Analogs', cmd: 'ANALOG_COMP' },
-    { icon: Zap, label: 'Analyze Volatility Precursors', cmd: 'VOL_FORENSICS' },
-    { icon: Activity, label: 'Toggle Liquidity Heatmap', cmd: 'TOGGLE_LIQ' },
+    { icon: Shield, label: 'Jump to Active Investigation', cmd: 'GOTO_INV', run: () => setWorkspace('replay') },
+    { icon: Target, label: 'Compare Historical Analogs', cmd: 'ANALOG_COMP', run: () => setWorkspace('recurrence') },
+    { icon: Zap, label: 'Analyze Volatility Precursors', cmd: 'VOL_FORENSICS', run: () => setWorkspace('diagnostics') },
+    { icon: Activity, label: 'Open Market Structure Workspace', cmd: 'GOTO_STRUCTURE', run: () => setWorkspace('market-structure') },
+    { icon: Activity, label: 'Toggle Forecast Overlay', cmd: 'TOGGLE_FORECAST', run: () => toggleOverlay('forecast') },
   ];
 
   return (
@@ -59,6 +60,7 @@ export const CommandPalette: React.FC = () => {
            {actions.map((a, i) => (
              <button
                key={i}
+               onClick={() => { a.run(); setCommandPalette(false); }}
                className="w-full flex items-center gap-3 px-3 py-2.5 rounded hover:bg-indigo-600/10 group transition-all text-left"
              >
                 <div className="w-6 h-6 rounded bg-slate-800 flex items-center justify-center group-hover:bg-indigo-600/20 group-hover:text-indigo-400 transition-colors">

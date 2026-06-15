@@ -1,5 +1,6 @@
 import React from 'react';
 import { Panel } from '../layout/Panel';
+import { useTerminalStore } from '../../state/terminalState';
 
 const ForecastHorizon: React.FC<{ horizon: string; value: number; uncertainty: number }> = ({ horizon, value, uncertainty }) => (
   <div className="flex flex-col border-l-2 border-indigo-500 pl-3 bg-indigo-500/5 py-2 mb-2 group hover:bg-indigo-500/10 transition-colors">
@@ -25,6 +26,12 @@ const ForecastHorizon: React.FC<{ horizon: string; value: number; uncertainty: n
 );
 
 export const ForecastingPanel: React.FC = () => {
+  const { marketStructure } = useTerminalStore();
+  const forecasts = marketStructure.forecasts.active.slice(0, 3);
+  const timesfmStatus = marketStructure.forecasts.status;
+  const timesfmError = marketStructure.forecasts.error;
+  const isStale = marketStructure.forecasts.stale;
+
   return (
     <Panel
       title="Probabilistic Forecasts (TimesFM)"
@@ -33,15 +40,17 @@ export const ForecastingPanel: React.FC = () => {
       helpRelationship="Forecasting divergence from microstructure pressure often precedes high-magnitude volatility events."
     >
     <div className="flex flex-col h-full text-slate-100 font-mono text-xs overflow-hidden p-2">
-      <div className="text-slate-500 mb-3 italic text-[9px] uppercase tracking-tighter">Realtime multi-horizon TimesFM inference</div>
+      <div className="text-slate-500 mb-3 italic text-[9px] uppercase tracking-tighter">Realtime multi-horizon TimesFM inference [{timesfmStatus}{isStale ? ' · STALE' : ''}]</div>
       <div className="space-y-1">
-        <ForecastHorizon horizon="T+1m" value={0.5422} uncertainty={0.012} />
-        <ForecastHorizon horizon="T+5m" value={0.5435} uncertainty={0.028} />
-        <ForecastHorizon horizon="T+15m" value={0.5410} uncertainty={0.045} />
+        {forecasts.length === 0 ? (
+          <div className="text-[10px] text-amber-400 uppercase">No runtime forecasts available · {timesfmError || timesfmStatus}</div>
+        ) : forecasts.map((f: any, i: number) => (
+          <ForecastHorizon key={`${f.horizon}-${i}`} horizon={`T+${f.horizon}`} value={f.prediction || 0} uncertainty={f.uncertainty_score || 0} />
+        ))}
       </div>
       <div className="mt-auto pt-2 border-t border-slate-800 flex justify-between text-[9px] text-slate-600">
          <span>CONTEXT_LEN: 512</span>
-         <span>INFERENCE_OK</span>
+         <span>{timesfmStatus}</span>
       </div>
     </div>
     </Panel>
